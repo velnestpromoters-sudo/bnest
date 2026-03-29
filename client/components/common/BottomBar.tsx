@@ -27,7 +27,7 @@ export default function BottomBar({ location, viewMode }: BottomBarProps) {
           className="flex flex-col items-center justify-center p-2 rounded-2xl transition hover:bg-white/10 active:scale-95 text-white/50"
         >
           {viewMode === 'reel' ? (
-             <><List className="w-6 h-6 mb-1 text-white" /><span className="text-[10px] font-bold text-white uppercase tracking-wider">List Mode</span></>
+             <><List className="w-6 h-6 mb-1 text-white" /><span className="text-[10px] font-bold text-white uppercase tracking-wider">Home</span></>
           ) : (
              <><PlaySquare className="w-6 h-6 mb-1 text-white" /><span className="text-[10px] font-bold text-white uppercase tracking-wider">Reels</span></>
           )}

@@ -107,17 +107,16 @@ export default function HomeReelPage() {
   return (
     <div className="relative w-full h-[100dvh] bg-black overflow-hidden">
       
-      {/* Absolute overlays that sit above the snapping videos */}
-      <SearchBar />
-      
-      <div className="absolute top-6 left-5 z-20">
+      {/* Header overlays that sit above the snapping videos */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-5 mt-2 flex items-center gap-3">
         <button 
           onClick={handleLoginClick}
-          className="bg-black/40 backdrop-blur-xl border border-white/20 shadow-xl px-4 py-2.5 rounded-full text-white/90 font-bold text-sm active:scale-95 transition-all flex items-center gap-2"
+          className="shrink-0 bg-black/40 backdrop-blur-xl border border-white/20 shadow-xl px-4 py-2.5 rounded-full text-white/90 font-bold text-sm active:scale-95 transition-all flex items-center gap-2"
         >
           <div className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-pulse"></div>
-          {isAuthenticated ? 'Dashboard' : 'Sign In'}
+          {isAuthenticated ? 'Dash' : 'Sign In'}
         </button>
+        <SearchBar />
       </div>
 
       {/* Snap Container */}
