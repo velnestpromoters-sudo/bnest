@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const propertyController = require('../controllers/propertyController');
-const { checkTenantAuth } = require('../middleware/authMiddleware');
+const { checkTenantAuth, protect } = require('../middleware/authMiddleware');
+const { upload } = require('../middleware/upload');
 
 router.get('/:id', checkTenantAuth, propertyController.getProperty);
 router.get('/', propertyController.getAllProperties); // general list
+
+router.post(
+  '/create',
+  protect, // Ensure user exists
+  upload.array('images', 5), // Max 5 images
+  propertyController.createProperty
+);
 
 module.exports = router;

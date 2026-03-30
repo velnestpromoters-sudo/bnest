@@ -43,3 +43,31 @@ exports.getProperty = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const { uploadToCloudinary } = require('../services/cloudinaryService');
+
+exports.createProperty = async (req, res) => {
+  try {
+    const files = req.files;
+    const imageUrls = [];
+
+    if (files && files.length > 0) {
+      for (let file of files) {
+        // Enforce basic validation type constraints
+        if (!file.mimetype.startsWith('image/')) continue;
+        const url = await uploadToCloudinary(file.path);
+        imageUrls.push(url);
+      }
+    }
+
+    const newProperty = await Property.create({
+      ...req.body,
+      images: imageUrls,
+      ownerId: req.user._id,
+    });
+
+    res.status(201).json({ success: true, data: newProperty });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};

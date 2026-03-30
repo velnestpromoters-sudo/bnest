@@ -14,7 +14,6 @@ const propertySchema = new mongoose.Schema({
   deposit: { type: Number, required: true },
   bhkType: String,
   images: [{ type: String }],
-  video: String,
   isVerified: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   matchScore: { type: Number, default: 0 },
