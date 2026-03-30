@@ -23,6 +23,12 @@ function CenterTracker({ onCenterChange, forcePosition }: { onCenterChange: (pos
       click: (e) => {
           // Instantly fly tapped location exactly to center underneath the needle
           map.flyTo(e.latlng, map.getZoom(), { animate: true, duration: 0.4 });
+      },
+      zoomstart: () => {
+          map.stop(); // Stop programmatic flying if user explicitly zooms
+      },
+      dragstart: () => {
+          map.stop(); // Stop programmatic flying if user explicitly drags
       }
   });
 
