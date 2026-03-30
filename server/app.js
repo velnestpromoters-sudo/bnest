@@ -15,6 +15,10 @@ app.use(express.urlencoded({ extended: true }));
 const healthRoute = require('./routes/health');
 
 // Routes
+app.get('/', (req, res) => {
+  res.status(200).send('<h2>Bnest API Backend is Live & Running!</h2><p>Base endpoints: /api/auth, /api/properties, /health</p>');
+});
+
 app.use('/health', healthRoute);
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
