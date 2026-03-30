@@ -1,158 +1,127 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Search, Navigation } from 'lucide-react';
+import { ArrowLeft, Navigation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useLocationStore } from '@/store/locationStore';
 
-// Next.js: Leaflet accesses window, so dynamically import it with SSR completely disabled
-const MapBackground = dynamic(() => import('@/components/map/MapBackground'), { ssr: false });
+// Disable SSR for Leaflet interactive maps
+const MapInteractive = dynamic(() => import('@/components/map/MapBackground'), { ssr: false });
 
-export default function LocationSelector() {
+export default function LocationTracker() {
   const router = useRouter();
   const { setLocation, coordinates } = useLocationStore();
-  const [search, setSearch] = useState('');
-  const [isDetecting, setIsDetecting] = useState(false);
   
-  // Mock districts
-  const districts = ['Coimbatore', 'Chennai', 'Bangalore', 'Kochi', 'Trivandrum', 'Hyderabad'];
+  // Tracking the needle's physical coordinate on the map
+  const [needlePosition, setNeedlePosition] = useState<[number, number]>(coordinates ? [coordinates.lat, coordinates.lng] : [11.0168, 76.9558]);
+  // State to force map to organically fly to the physical GPS location
+  const [forceFlyTo, setForceFlyTo] = useState<[number, number] | null>(null);
+  
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
-  const handleDetectLocation = () => {
-    if (!('geolocation' in navigator)) return alert("Geolocation not supported");
+  // Called 60 times a second when user drags the map!
+  const handleMapMove = useCallback((lat: number, lng: number) => {
+      setNeedlePosition([lat, lng]);
+  }, []);
+
+  // Native GPS triangulation (Satellite Ping)
+  const triggerGPSLocate = () => {
+    if (!('geolocation' in navigator)) return alert("GPS not supported on this device.");
+    setIsLocating(true);
     
-    setIsDetecting(true);
-    
-    // Aggressive Dual-Fallback Detection System (Mappls -> BigDataCloud)
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          let detected = null;
-
-          // 1. Ask Secure API Proxy (Mappls Enterprise)
-          try {
-            const mapplsRes = await fetch(`/api/location?lat=${latitude}&lng=${longitude}`);
-            const mapplsData = await mapplsRes.json();
-            if (mapplsData.success && mapplsData.location) {
-              detected = mapplsData.location;
-            }
-          } catch (proxyErr) {
-             console.warn("Mappls Proxy Failed", proxyErr);
-          }
-
-          // 2. Safely Fallback to BigDataCloud Free API
-          if (!detected) {
-            const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
-            const bdcData = await bdcRes.json();
-            detected = bdcData.locality || bdcData.city || bdcData.principalSubdivision;
-          }
-
-          const finalLocation = detected || 'Unknown Area';
-          setLocation(`📍 ${finalLocation}`, { lat: latitude, lng: longitude });
-          
-          // Cinematic pause to show the spinning "Triangulating Make..." UI & let map fly to marker
-          setTimeout(() => {
-             setIsDetecting(false);
-             router.push('/home'); 
-          }, 1500);
-          
-        } catch (error) {
-          console.error("Total Geocoding failure", error);
-          setIsDetecting(false);
-          alert("Could not detect location securely. Please select manually.");
-        }
+      (pos) => {
+         const { latitude, longitude } = pos.coords;
+         setForceFlyTo([latitude, longitude]); // Map organically swoops to exact GPS chip location
+         setIsLocating(false);
       },
       (err) => {
-        setIsDetecting(false);
-        alert("Please enable GPS permissions to use this feature.");
-      }
+         console.warn("GPS Permission Denied:", err);
+         alert("Please enable GPS Location Permissions allowing the browser to track satellites.");
+         setIsLocating(false);
+      },
+      { enableHighAccuracy: true }
     );
   };
 
-  const handleManualSelect = (district: string) => {
-     setLocation(`📍 ${district}`); // Coords are null, map will revert to default
-     router.push('/home');
+  // Final Geocoding Step (Hits OSM Native Proxy Server)
+  const handleConfirmLocation = async () => {
+      setIsConfirming(true);
+      const [lat, lng] = needlePosition;
+
+      try {
+          const res = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
+          const data = await res.json();
+          
+          if (data.success && data.location) {
+             setLocation(`📍 ${data.location}`, { lat, lng });
+          } else {
+             setLocation('📍 Unknown Area', { lat, lng });
+          }
+          
+          router.push('/home'); // Swoop back to Reel with fresh location!
+
+      } catch (err) {
+          console.error("OSM Geocoding failed:", err);
+          setLocation('📍 Map Dropped Area', { lat, lng });
+          router.push('/home');
+      } finally {
+          setIsConfirming(false);
+      }
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-black flex flex-col overflow-hidden">
+    <div className="relative h-[100dvh] bg-black flex flex-col overflow-hidden">
       
-      {/* 1. Underlying Map Engine */}
-      <MapBackground coordinates={coordinates} />
+      {/* 1. Underlying Interactive Map (Uber-Style) */}
+      <MapInteractive 
+          initialCoordinates={coordinates} 
+          forceLocation={forceFlyTo} 
+          onLocationUpdate={handleMapMove}
+      />
 
-      {/* 2. Glassmorphism Screen Overlay (Dims map and creates blur) */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 pointer-events-none" />
+      {/* 2. Floating Header */}
+      <header className="absolute top-0 left-0 right-0 z-20 px-5 pt-10 pb-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none flex items-center">
+        <button onClick={() => router.back()} className="p-3 bg-white/10 backdrop-blur-md rounded-full active:scale-95 transition pointer-events-auto border border-white/20 shadow-xl">
+          <ArrowLeft className="w-6 h-6 text-white drop-shadow-lg" />
+        </button>
+      </header>
 
-      {/* 3. Interactive UI Layer */}
-      <div className="relative z-20 flex flex-col h-full flex-1">
-          <header className="bg-white/90 backdrop-blur-md px-5 py-5 flex items-center gap-4 sticky top-0 shadow-sm border-b border-white/20">
-            <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-black/5 active:scale-95 transition">
-              <ArrowLeft className="w-6 h-6 text-slate-800" />
-            </button>
-            <span className="font-extrabold text-xl tracking-tight text-slate-900 drop-shadow-sm">Select Location</span>
-          </header>
+      {/* 3. Locator FAB Button (Center Right) */}
+      <button 
+          onClick={triggerGPSLocate}
+          disabled={isLocating}
+          className="absolute right-5 bottom-[140px] z-20 w-14 h-14 bg-white text-[#FF6A3D] rounded-full shadow-2xl flex items-center justify-center border-2 border-white/50 active:scale-90 transition-transform hover:shadow-[#FF6A3D]/40 hover:shadow-lg"
+      >
+          {isLocating ? (
+              <div className="w-5 h-5 border-2 border-[#FF6A3D] border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+              <Navigation className="w-6 h-6 fill-[#FF6A3D]/20 animate-pulse" />
+          )}
+      </button>
 
-          <div className="p-5 flex-1 max-w-md mx-auto w-full overflow-y-auto">
+      {/* 4. Powerful Bottom Action Sheet */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 p-5 bg-gradient-to-t from-black/80 via-black/60 to-transparent pb-10">
+         <div className="max-w-md mx-auto bg-white/10 backdrop-blur-2xl border border-white/30 rounded-3xl p-5 shadow-2xl">
+            <h3 className="font-extrabold text-white text-lg tracking-tight mb-1">Set Your Nest Location</h3>
+            <p className="text-white/60 text-xs font-medium mb-5 leading-relaxed">Drag the map exactly over your desired area or tap the GPS icon to satellite-track.</p>
             
-            {/* Search Bar */}
-            <div className="mb-6 relative group shadow-md rounded-3xl">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-slate-400 group-focus-within:text-[#FF6A3D] transition-colors" />
-              </div>
-              <input 
-                type="text" 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for your district..." 
-                className="w-full pl-14 pr-5 py-4 rounded-3xl bg-white/95 backdrop-blur-md border border-white/50 outline-none text-slate-900 focus:shadow-lg focus:border-[#FF6A3D] transition-all text-sm font-semibold placeholder:font-medium placeholder:text-slate-400"
-              />
-            </div>
-
-            {/* Huge Auto-Detect Target */}
             <button 
-              onClick={handleDetectLocation}
-              disabled={isDetecting}
-              className={`w-full flex items-center gap-4 p-5 bg-[#FF6A3D]/90 backdrop-blur-xl border border-[#FF6A3D]/40 rounded-3xl mb-6 shadow-xl active:scale-[0.98] transition-all text-left group overflow-hidden relative ${isDetecting ? 'opacity-80 pointer-events-none' : 'hover:bg-[#FF6A3D]'}`}
+                onClick={handleConfirmLocation}
+                disabled={isConfirming}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-[#FF6A3D] text-white rounded-2xl font-black text-sm uppercase tracking-wide active:scale-[0.98] transition-all shadow-xl shadow-[#FF6A3D]/30"
             >
-              {/* Animated ping effect */}
-              {isDetecting && <div className="absolute inset-0 bg-white/20 animate-pulse"></div>}
-
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md shrink-0 relative z-10">
-                 {isDetecting ? (
-                    <div className="w-5 h-5 border-2 border-[#FF6A3D] border-t-transparent rounded-full animate-spin"></div>
-                 ) : (
-                    <Navigation className="w-5 h-5 text-[#FF6A3D] fill-[#FF6A3D]/20 animate-bounce" />
-                 )}
-              </div>
-              <div className="flex-1 relative z-10">
-                 <h4 className="text-white font-black text-lg tracking-tight shadow-black/10 text-shadow-sm">
-                   {isDetecting ? 'Triangulating Map...' : 'Detect Exact Location'}
-                 </h4>
-                 <p className="text-orange-100 text-xs mt-0.5 font-medium">Uses GPS for hyper-precision</p>
-              </div>
+                {isConfirming ? (
+                    'Pinpointing Block...'
+                ) : (
+                    'Confirm Location Pin'
+                )}
             </button>
-
-            {/* List */}
-            <div className="mb-10">
-              <h3 className="text-slate-600 font-extrabold uppercase tracking-widest text-[10px] mb-3 ml-2 drop-shadow-sm">Popular Districts</h3>
-              <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-3xl overflow-hidden shadow-lg">
-                {districts.filter(d => d.toLowerCase().includes(search.toLowerCase())).map((district, index) => (
-                  <button 
-                    key={district}
-                    onClick={() => handleManualSelect(district)}
-                    className={`w-full text-left p-4 font-bold text-slate-800 hover:bg-slate-50 flex items-center gap-3 transition-colors ${index !== districts.length - 1 ? 'border-b border-slate-100/50' : ''}`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                       <MapPin className="w-4 h-4 text-slate-500" />
-                    </div>
-                    {district}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+         </div>
       </div>
+
     </div>
   );
 }
