@@ -26,7 +26,8 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
           scale: 0.8, 
           x: spheres[i].x, 
           y: spheres[i].y,
-          filter: `blur(${spheres[i].blur}px)`
+          // Box shadow added for the physical 3D stacking effect shown in Figma
+          boxShadow: '0px 10px 30px rgba(0,0,0,0.5)'
       }),
       parallax: { 
           scale: [0.8, 1.2], 
@@ -38,7 +39,7 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
           scale: 2, 
           x: spheres[i].x * 2.5, 
           y: spheres[i].y * 2.5, 
-          opacity: 0.15, 
+          opacity: 0, // Fade out completely when scattering
           transition: { duration: 1.0, ease: "easeOut" } 
       }),
       hide: { 
@@ -121,7 +122,7 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
       initial={{ backgroundColor: "#000000" }}
       className="relative w-full h-[100dvh] overflow-hidden flex items-center justify-center font-sans tracking-wide"
     >
-      {/* 1. Organic Spheres Layer */}
+      {/* 1. Stacked Figma Spheres Layer */}
       {spheres.map((sphere, index) => (
         <motion.div
            key={sphere.id}
@@ -135,7 +136,7 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
              height: sphere.size,
              borderRadius: '50%',
              backgroundColor: sphere.color,
-             mixBlendMode: 'screen',
+             // Removed mixBlendMode to allow solid stacking
            }}
         />
       ))}
