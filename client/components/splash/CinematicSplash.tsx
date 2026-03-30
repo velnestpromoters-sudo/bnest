@@ -142,8 +142,8 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
       ))}
 
       {/* 2. Logo Container */}
-      <div className="relative w-[140px] h-[140px] z-10 flex items-center justify-center drop-shadow-xl">
-        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="140pt" height="140pt" viewBox="0 0 140 140" preserveAspectRatio="xMidYMid meet" className="w-[120px] h-[120px] overflow-visible">
+      <div className="relative w-[220px] h-[220px] z-10 flex items-center justify-center drop-shadow-xl">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="140pt" height="140pt" viewBox="0 0 140 140" preserveAspectRatio="xMidYMid meet" className="w-[200px] h-[200px] overflow-visible">
             <motion.g 
                transform="translate(0.000000,140.000000) scale(0.100000,-0.100000)" 
                fill="#FF5A1F" 
