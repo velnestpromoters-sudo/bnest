@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, CheckCircle, Percent, Share2, Image as ImageIcon } from 'lucide-react';
+import { MapPin, CheckCircle, Percent, Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface VideoCardProps {
@@ -20,16 +20,20 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+
+  // Combine video and images into a single media array for the horizontal scroll
+  const mediaList = [video, ...(images || [])];
 
   useEffect(() => {
-    // Play video if active slide, otherwise pause
-    if (isActive && videoRef.current) {
+    // Play video if active property slide AND the first horizontal slide (video) is active
+    if (isActive && activeMediaIndex === 0 && videoRef.current) {
       videoRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.log('Video autoplay blocked', e));
-    } else if (!isActive && videoRef.current) {
+    } else if (videoRef.current) {
       videoRef.current.pause();
       setIsPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, activeMediaIndex]);
 
   const handleShare = async () => {
       try {
@@ -40,33 +44,72 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
                   url: window.location.origin + `/property/${id}`
               });
           } else {
-              // Fallback copy to clipboard or custom bottom sheet.
               alert("Link copied! Share this with your friends.");
               navigator.clipboard.writeText(window.location.origin + `/property/${id}`);
           }
       } catch (err) {
-          // user cancelled the native share sheet
           console.log("Share sheet closed");
+      }
+  };
+
+  // Detect horizontal swipe to update pagination dots
+  const handleHorizontalScroll = (e: React.UIEvent<HTMLDivElement>) => {
+      const container = e.currentTarget;
+      const slideWidth = container.clientWidth;
+      const newActiveIndex = Math.round(container.scrollLeft / slideWidth);
+      if (newActiveIndex !== activeMediaIndex) {
+          setActiveMediaIndex(newActiveIndex);
       }
   };
 
   return (
     <div className="relative w-full h-[100dvh] bg-black snap-start snap-always shrink-0 overflow-hidden">
-      {/* Video Background */}
-      <video
-        ref={videoRef}
-        src={video}
-        className="absolute inset-0 w-full h-full object-cover"
-        loop
-        muted
-        playsInline
-      />
+      
+      {/* Horizontal Full Screen Scrollable Carousel (Video + Images) */}
+      <div 
+        onScroll={handleHorizontalScroll}
+        className="absolute inset-0 flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+      >
+          {mediaList.map((mediaSrc, idx) => (
+             <div key={idx} className="relative w-full h-full shrink-0 snap-center flex items-center justify-center bg-black">
+                {idx === 0 ? (
+                    <video
+                        ref={videoRef}
+                        src={mediaSrc}
+                        className="w-full h-full object-cover"
+                        loop
+                        muted
+                        playsInline
+                    />
+                ) : (
+                    <img 
+                        src={mediaSrc} 
+                        className="w-full h-full object-cover" 
+                        alt="Property Exterior/Interior View"
+                    />
+                )}
+             </div>
+          ))}
+      </div>
 
-      {/* Dark Overlay Gradient (Better text readability) */}
+      {/* Dark Overlay Gradient (Better text readability for the bottom text) */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
+      {/* Top Carousel Pagination Dots (Tinder-style) */}
+      {mediaList.length > 1 && (
+         <div className="absolute top-[75px] left-0 right-0 z-20 flex items-center justify-center gap-1.5 px-4 pointer-events-none">
+             {mediaList.map((_, dotIdx) => (
+                 <div 
+                    key={dotIdx} 
+                    className={`h-1.5 rounded-full transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.5)] ${activeMediaIndex === dotIdx ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`}
+                 />
+             ))}
+         </div>
+      )}
+
       {/* Top Right: Match Badge */}
-      <div className="absolute top-[88px] right-4 pointer-events-none z-10 flex flex-col gap-4">
+      <div className="absolute top-[96px] right-4 pointer-events-none z-10 flex flex-col gap-4">
         <div className="flex flex-col items-center bg-black/40 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-lg pointer-events-auto">
           <div className="bg-emerald-500 text-white rounded-full p-1.5 mb-1 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
             <Percent className="w-3.5 h-3.5" />
@@ -87,27 +130,9 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
         </button>  
       </div>
 
-      {/* Bottom overlay: Images Gallery & Property details */}
+      {/* Bottom overlay: Property details */}
       <div className="absolute bottom-[90px] left-0 right-0 px-5 mb-2 z-10 flex flex-col justify-end pointer-events-auto">
         
-        {/* Horizontal Scroll Image Snippets */}
-        {images && images.length > 0 && (
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar mb-5 pb-1 -mx-5 px-5">
-               {images.map((imgUrl, i) => (
-                   <img 
-                      key={i} 
-                      src={imgUrl} 
-                      className="w-[110px] h-[75px] object-cover rounded-xl border border-white/20 shadow-lg shrink-0 pointer-events-none" 
-                      alt="Property Image Thumbnail"
-                   />
-               ))}
-               <div className="w-[110px] h-[75px] shrink-0 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-lg flex flex-col items-center justify-center text-white/80">
-                   <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                   <span className="text-[10px] font-bold uppercase tracking-widest">+5 More</span>
-               </div>
-            </div>
-        )}
-
         {/* Title / Rent */}
         <h2 className="text-white text-3xl font-black mb-1 drop-shadow-md">
           ₹{rent.toLocaleString()} <span className="text-lg text-white/80 font-semibold">/mo</span>
