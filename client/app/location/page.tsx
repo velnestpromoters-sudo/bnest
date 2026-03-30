@@ -26,7 +26,7 @@ export default function LocationTracker() {
       setNeedlePosition([lat, lng]);
   }, []);
 
-  // Native GPS triangulation (Satellite Ping)
+  // Native GPS triangulation (Satellite Ping) + Cinematic Zoom Automator
   const triggerGPSLocate = () => {
     if (!('geolocation' in navigator)) return alert("GPS not supported on this device.");
     setIsLocating(true);
@@ -34,8 +34,12 @@ export default function LocationTracker() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
          const { latitude, longitude } = pos.coords;
-         setForceFlyTo([latitude, longitude]); // Map organically swoops to exact GPS chip location
-         setIsLocating(false);
+         setForceFlyTo([latitude, longitude]); // Map organically swoops to exact GPS chip location (3.5s animation)
+         
+         // Wait exactly 4 seconds for the majestic zoom animation to finish, then auto-confirm location!
+         setTimeout(() => {
+            handleAutoConfirm([latitude, longitude]);
+         }, 3800);
       },
       (err) => {
          console.warn("GPS Permission Denied:", err);
@@ -46,10 +50,9 @@ export default function LocationTracker() {
     );
   };
 
-  // Final Geocoding Step (Hits OSM Native Proxy Server)
-  const handleConfirmLocation = async () => {
-      setIsConfirming(true);
-      const [lat, lng] = needlePosition;
+  // Final Geocoding Step (Hits OSM Native Proxy Server automatically)
+  const handleAutoConfirm = async (coords: [number, number]) => {
+      const [lat, lng] = coords;
 
       try {
           const res = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
@@ -65,10 +68,10 @@ export default function LocationTracker() {
 
       } catch (err) {
           console.error("OSM Geocoding failed:", err);
-          setLocation('📍 Map Dropped Area', { lat, lng });
+          setLocation('📍 Map Area', { lat, lng });
           router.push('/home');
       } finally {
-          setIsConfirming(false);
+          setIsLocating(false);
       }
   };
 
@@ -89,37 +92,24 @@ export default function LocationTracker() {
         </button>
       </header>
 
-      {/* 3. Locator FAB Button (Center Right) */}
-      <button 
-          onClick={triggerGPSLocate}
-          disabled={isLocating}
-          className="absolute right-5 bottom-[140px] z-20 w-14 h-14 bg-white text-[#FF6A3D] rounded-full shadow-2xl flex items-center justify-center border-2 border-white/50 active:scale-90 transition-transform hover:shadow-[#FF6A3D]/40 hover:shadow-lg"
-      >
-          {isLocating ? (
-              <div className="w-5 h-5 border-2 border-[#FF6A3D] border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-              <Navigation className="w-6 h-6 fill-[#FF6A3D]/20 animate-pulse" />
-          )}
-      </button>
-
-      {/* 4. Powerful Bottom Action Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 p-5 bg-gradient-to-t from-black/80 via-black/60 to-transparent pb-10">
-         <div className="max-w-md mx-auto bg-white/10 backdrop-blur-2xl border border-white/30 rounded-3xl p-5 shadow-2xl">
-            <h3 className="font-extrabold text-white text-lg tracking-tight mb-1">Set Your Nest Location</h3>
-            <p className="text-white/60 text-xs font-medium mb-5 leading-relaxed">Drag the map exactly over your desired area or tap the GPS icon to satellite-track.</p>
+      {/* 3. Locator FAB Button (Bottom Center) */}
+      <div className="absolute bottom-16 left-0 right-0 z-20 flex justify-center pointer-events-none">
+        <button 
+            onClick={triggerGPSLocate}
+            disabled={isLocating}
+            className="pointer-events-auto flex items-center gap-3 px-8 py-4 bg-white text-[#FF6A3D] rounded-full shadow-2xl border-2 border-white/50 active:scale-95 transition-all hover:shadow-[#FF6A3D]/40 hover:shadow-lg overflow-hidden relative"
+        >
+            {isLocating && <div className="absolute inset-0 bg-[#FF6A3D]/5 animate-pulse" />}
             
-            <button 
-                onClick={handleConfirmLocation}
-                disabled={isConfirming}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-[#FF6A3D] text-white rounded-2xl font-black text-sm uppercase tracking-wide active:scale-[0.98] transition-all shadow-xl shadow-[#FF6A3D]/30"
-            >
-                {isConfirming ? (
-                    'Pinpointing Block...'
-                ) : (
-                    'Confirm Location Pin'
-                )}
-            </button>
-         </div>
+            {isLocating ? (
+                <div className="w-5 h-5 border-2 border-[#FF6A3D] border-t-transparent rounded-full animate-spin shrink-0"></div>
+            ) : (
+                <Navigation className="w-6 h-6 fill-[#FF6A3D]/20 animate-bounce shrink-0" />
+            )}
+            <span className="font-extrabold text-[#FF6A3D] text-lg tracking-tight pr-1">
+                {isLocating ? 'Scanning Satellites...' : 'Pick My Location'}
+            </span>
+        </button>
       </div>
 
     </div>

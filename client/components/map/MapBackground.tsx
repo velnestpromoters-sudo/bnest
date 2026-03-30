@@ -22,10 +22,10 @@ function CenterTracker({ onCenterChange, forcePosition }: { onCenterChange: (pos
       }
   });
 
-  // Whenever forcePosition updates (e.g. from "Locate Me" button), fly exactly to it instantly
+  // Whenever forcePosition updates (e.g. from "Pick Me" button), fly exactly to it cinematically
   useEffect(() => {
     if (forcePosition) {
-       map.flyTo(forcePosition, 16, { animate: true, duration: 1 });
+       map.flyTo(forcePosition, 18, { animate: true, duration: 3.5 }); // Cinematic 3.5s zoom to street level
        onCenterChange(forcePosition);
     }
   }, [forcePosition, map, onCenterChange]);
@@ -42,8 +42,9 @@ export default function InteractiveMap({
     forceLocation: [number, number] | null,
     onLocationUpdate: (lat: number, lng: number) => void
 }) {
-  const defaultCenter: [number, number] = [11.0168, 76.9558]; // Coimbatore default
-  const position: [number, number] = initialCoordinates ? [initialCoordinates.lat, initialCoordinates.lng] : defaultCenter;
+  const indiaCenter: [number, number] = [22.5937, 78.9629]; // Full India view
+  const position: [number, number] = initialCoordinates ? [initialCoordinates.lat, initialCoordinates.lng] : indiaCenter;
+  const initialZoom = initialCoordinates ? 18 : 5; // Zoom 5 shows entire India, 18 shows street
 
   const handleCenterUpdate = (pos: [number, number]) => {
       onLocationUpdate(pos[0], pos[1]);
@@ -53,7 +54,7 @@ export default function InteractiveMap({
     <div className="absolute inset-0 z-0">
       <MapContainer 
         center={position} 
-        zoom={16} 
+        zoom={initialZoom}  
         zoomControl={false}
         className="w-full h-full"
       >
