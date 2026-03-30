@@ -51,8 +51,11 @@ export default function LocationSelector() {
           const finalLocation = detected || 'Unknown Area';
           setLocation(`📍 ${finalLocation}`, { lat: latitude, lng: longitude });
           
-          setIsDetecting(false);
-          router.push('/home'); // Send directly to reel!
+          // Cinematic pause to show the spinning "Triangulating Make..." UI & let map fly to marker
+          setTimeout(() => {
+             setIsDetecting(false);
+             router.push('/home'); 
+          }, 1500);
           
         } catch (error) {
           console.error("Total Geocoding failure", error);
@@ -79,7 +82,7 @@ export default function LocationSelector() {
       <MapBackground coordinates={coordinates} />
 
       {/* 2. Glassmorphism Screen Overlay (Dims map and creates blur) */}
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 pointer-events-none" />
 
       {/* 3. Interactive UI Layer */}
       <div className="relative z-20 flex flex-col h-full flex-1">
