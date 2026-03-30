@@ -21,7 +21,7 @@ export default function OwnerDashboard() {
     const fetchProps = async () => {
       try {
          const token = localStorage.getItem('token');
-         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/properties`, {
+         const res = await fetch(`/api/properties`, {
              headers: { 'Authorization': `Bearer ${token}` }
          });
          const data = await res.json();

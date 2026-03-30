@@ -13,47 +13,39 @@ export default function Step2() {
     router.push('/owner/add-property/step-3');
   };
 
+  const handleGPSDetect = () => {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const mapURL = `https://maps.google.com/?q=${latitude},${longitude}`;
+                updateLocation('googleMapLink', mapURL);
+            },
+            (err) => alert("Please allow Location Access in your browser settings to use this feature.")
+        );
+    } else {
+        alert("Geolocation is not supported by your browser.");
+    }
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
        <h2 className="text-2xl font-black text-gray-900 mb-1">Pin the Location</h2>
        <p className="text-sm text-gray-500 mb-8">Where exactly is this property?</p>
 
-       <form onSubmit={handleNext} className="flex flex-col gap-5">
+       <form onSubmit={handleNext} className="flex flex-col gap-5 pb-24">
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Google Maps Link *</label>
-             <div className="flex gap-2">
-                 <input 
-                    type="url" 
-                    required
-                    value={location.googleMapLink}
-                    onChange={(e) => updateLocation('googleMapLink', e.target.value)}
-                    placeholder="https://maps.google.com/..."
-                    pattern="https?://.*"
-                    className="flex-1 w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
-                 />
-                 <button 
-                    type="button" 
-                    title="Detect Current Location"
-                    onClick={() => {
-                        if ("geolocation" in navigator) {
-                            navigator.geolocation.getCurrentPosition(
-                                (position) => {
-                                    const { latitude, longitude } = position.coords;
-                                    const mapURL = `https://maps.google.com/?q=${latitude},${longitude}`;
-                                    updateLocation('googleMapLink', mapURL);
-                                },
-                                (err) => alert("Please allow Location Access in your browser settings to use this feature.")
-                            );
-                        } else {
-                            alert("Geolocation is not supported by your browser.");
-                        }
-                    }}
-                    className="p-4 bg-gray-100 border-2 border-gray-200 rounded-xl text-gray-600 hover:text-[#FF5A1F] hover:bg-orange-50 transition-colors"
-                 >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-5 10-5 10s-5-6.483-5-10a5 5 0 0110 0z"></path><circle cx="6" cy="11" r="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></circle></svg>
-                 </button>
-             </div>
-             <p className="text-xs text-gray-400 mt-2">Mandatory for verification routing. Tap the GPS icon to auto-fill.</p>
+             <label className="block text-sm font-bold text-gray-700 mb-2">Current Location Link *</label>
+             <input 
+                type="url" 
+                required
+                value={location.googleMapLink}
+                onChange={(e) => updateLocation('googleMapLink', e.target.value)}
+                placeholder="https://maps.google.com/..."
+                pattern="https?://.*"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+             />
+             <p className="text-xs text-gray-400 mt-2">Mandatory for verification routing.</p>
           </div>
 
           <div>
@@ -93,9 +85,21 @@ export default function Step2() {
               </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-10 md:static md:bg-transparent md:border-0 md:p-0 md:mt-4">
-             <button type="submit" className="w-full bg-[#FF5A1F] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#E04812] transition-colors">
-                Next Step →
+          <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-50 flex gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:static md:shadow-none md:border-0 md:bg-transparent">
+             {/* Left Bottom: Next/Confirm */}
+             <button type="submit" className="flex-[0.5] flex items-center justify-center gap-2 bg-[#FF5A1F] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#E04812] transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                Confirm
+             </button>
+             
+             {/* Right Bottom: Track / GPS */}
+             <button 
+                type="button" 
+                onClick={handleGPSDetect}
+                className="flex-[0.5] flex items-center justify-center gap-2 bg-gray-900 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-black transition-colors"
+             >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-5 10-5 10s-5-6.483-5-10a5 5 0 0110 0z"></path><circle cx="6" cy="11" r="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></circle></svg>
+                Track GPS
              </button>
           </div>
        </form>
