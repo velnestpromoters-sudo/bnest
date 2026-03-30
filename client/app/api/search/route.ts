@@ -3,14 +3,22 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get('q');
+  const lat = searchParams.get('lat');
+  const lng = searchParams.get('lng');
 
   if (!q) {
     return NextResponse.json({ success: false, error: 'Missing query' }, { status: 400 });
   }
 
   try {
-    // Call Photon from Server side to explicitly bypass client browser CORS barriers
-    const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`, {
+    // Call Photon from Server side and BIAS heavily towards the user's current Map Center
+    // This allows loosely spelled abbreviations like "ngp college" to match "Dr.N.G.P. Arts and Science College" because it's nearby!
+    let photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8`;
+    if (lat && lng) {
+        photonUrl += `&lat=${lat}&lon=${lng}`;
+    }
+
+    const response = await fetch(photonUrl, {
         headers: {
             'Accept-Language': 'en',
             'User-Agent': 'Bnest-Property-App/1.0 (Development Server)'

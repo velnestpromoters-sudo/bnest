@@ -42,7 +42,8 @@ export default function LocationTracker() {
      const timer = setTimeout(async () => {
          setIsSearching(true);
          try {
-             const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+             const [lat, lng] = needlePosition; // Inject Spatial Mapping to bias results to local Indian cities!
+             const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&lat=${lat}&lng=${lng}`);
              const data = await res.json();
              if (data.success) {
                  setSearchResults(data.features || []);
@@ -74,7 +75,8 @@ export default function LocationTracker() {
       
       setIsSearching(true);
       try {
-          const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+          const [nLat, nLng] = needlePosition;
+          const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&lat=${nLat}&lng=${nLng}`);
           const data = await res.json();
           if (data.success && data.features.length > 0) {
               // Take the absolute best matching result and fly there!
