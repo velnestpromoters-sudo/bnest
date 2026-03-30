@@ -6,6 +6,7 @@ import VideoCard from '@/components/reel/VideoCard';
 import SearchBar from '@/components/common/SearchBar';
 import BottomBar from '@/components/common/BottomBar';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocationStore } from '@/store/locationStore';
 
 // Mock Data: 5 Vertical Video Properties
 const MOCK_REELS = [
@@ -62,43 +63,54 @@ export default function HomeReelPage() {
   
   // States
   const [activeSlide, setActiveSlide] = useState(0);
-  const [locationName, setLocationName] = useState('Detecting...');
   const containerRef = useRef<HTMLDivElement>(null);
+  const { locationName, setLocation } = useLocationStore();
 
-  // 1. Geolocation Logic with Mappls Enterprise API
+  // 1. Dual-Fallback Geolocation Architecture (Mappls Proxy -> BigDataCloud)
   useEffect(() => {
-    // Attempt auto-detect
-    if ('geolocation' in navigator) {
+    // Only detect if user hasn't physically set their location manually yet
+    if (locationName === '📍 Select Location' && 'geolocation' in navigator) {
+      setLocation('Locating...');
+      
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           try {
             const { latitude, longitude } = pos.coords;
-            const mapplsKey = process.env.NEXT_PUBLIC_MAPPLS_API || '';
-            const res = await fetch(`https://apis.mappls.com/advancedmaps/v1/${mapplsKey}/rev_geocode?lat=${latitude}&lng=${longitude}`);
-            const data = await res.json();
-            
-            if (data.results && data.results.length > 0) {
-              const locationData = data.results[0];
-              // MapmyIndia returns hyper-local boundaries like subLocality, city, district
-              const detectedLocation = locationData.subLocality || locationData.city || locationData.district || 'Location Setup';
-              setLocationName(`📍 ${detectedLocation}`);
-            } else {
-              setLocationName('📍 Unknown Area');
+            let detected = null;
+
+            // Strategy 1: Attempt highly-accurate Mappls via secure Backend Proxy
+            try {
+              const mapplsRes = await fetch(`/api/location?lat=${latitude}&lng=${longitude}`);
+              const mapplsData = await mapplsRes.json();
+              if (mapplsData.success && mapplsData.location) {
+                detected = mapplsData.location;
+              }
+            } catch (proxyErr) {
+               console.warn("Mappls proxy crashed natively.", proxyErr);
             }
+
+            // Strategy 2: If Mappls failed (or returned false), blindly default to BigDataCloud
+            if (!detected) {
+               console.log("Failing gracefully to BigDataCloud fallback...");
+               const bdcRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+               const bdcData = await bdcRes.json();
+               detected = bdcData.locality || bdcData.city || bdcData.principalSubdivision;
+            }
+
+            setLocation(`📍 ${detected || 'Unknown Area'}`, { lat: latitude, lng: longitude });
+
           } catch (error) {
-            console.error('Failed to deduce location from Mappls:', error);
-            setLocationName('📍 Select Location');
+            console.error('Total Geocoding failure:', error);
+            setLocation('📍 Select Location');
           }
         },
         (err) => {
           console.warn('Geolocation denied or failed:', err);
-          setLocationName('📍 Select Location');
+          setLocation('📍 Select Location');
         }
       );
-    } else {
-      setLocationName('📍 Select Location');
     }
-  }, []);
+  }, [locationName, setLocation]);
 
   // 2. Scroll Logic to detect Active Video (Intersection Observer technique via scrolling)
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
