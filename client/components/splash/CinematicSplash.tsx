@@ -10,12 +10,12 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
   const controlsRoof = useAnimationControls();
   const controlsNest = useAnimationControls();
 
-  // Memoize dense grid of sphere coordinates to pack the mobile screen
-  const spheres = useMemo(() => Array.from({ length: 25 }).map((_, i) => ({
+  // Memoize extremely dense grid of sphere coordinates to absolutely flood the mobile screen
+  const spheres = useMemo(() => Array.from({ length: 50 }).map((_, i) => ({
     id: i,
-    x: (Math.random() - 0.5) * 1200, // wider horizontal spread
-    y: (Math.random() - 0.5) * 2000, // taller vertical spread
-    size: Math.random() * 300 + 150, // massively increased disc sizes (150px - 450px)
+    x: (Math.random() - 0.5) * 1400, // massively wide horizontal overlap
+    y: (Math.random() - 0.5) * 2400, // massively tall vertical overlap
+    size: Math.random() * 350 + 200, // colossally increased disc sizes (200px - 550px)
     blur: Math.random() * 20 + 10,
     color: ['#FF5A1F', '#FF7A3C', '#FFB199'][i % 3]
   })), []);
