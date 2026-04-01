@@ -15,7 +15,7 @@ export default function Root() {
       } else {
         const role = user?.role;
         if (role === 'tenant') {
-           router.push('/tenant/home');
+           router.push('/home');
         } else if (role === 'owner') {
            router.push('/owner/dashboard');
         } else {

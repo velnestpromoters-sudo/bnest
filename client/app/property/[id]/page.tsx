@@ -111,35 +111,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                Login to View Details
              </button>
           </div>
-        ) : !paymentUnlocked && role === 'tenant' ? (
-          <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4">
-             <h3 className="text-lg font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
-                 <Lock className="w-5 h-5 text-slate-400" /> Premium Access
-             </h3>
-             <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-700 relative overflow-hidden text-center">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h4 className="text-white font-black text-xl mb-2">Unlock Owner Contact</h4>
-                <p className="text-slate-300 text-sm mb-6 leading-relaxed">
-                  Pay a one-time fee to permanently unlock direct calling functionality and exact property coordinates for this listing.
-                </p>
-                
-                <button 
-                  onClick={simulatePayment}
-                  disabled={isProcessingPayment}
-                  className="w-full py-4 bg-gradient-to-r from-[#FF6A3D] to-[#ff4a11] text-white font-bold rounded-xl shadow-xl shadow-orange-500/30 active:scale-[0.98] transition-all flex justify-center items-center gap-2 disabled:opacity-75 disabled:active:scale-100"
-                >
-                  {isProcessingPayment ? (
-                     <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Processing Gateway...</>
-                  ) : (
-                     <>Pay ₹199 via UPI / Card</>
-                  )}
-                </button>
-                <div className="mt-4 flex items-center justify-center gap-1.5 opacity-60">
-                    <ShieldCheck className="w-4 h-4 text-white" />
-                    <span className="text-white text-xs font-semibold uppercase tracking-widest">Secure Encrypted Payment</span>
-                </div>
-             </div>
-          </div>
         ) : (
           <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-2 fade-in">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-2 flex items-center gap-2">

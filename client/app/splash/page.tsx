@@ -11,17 +11,12 @@ export default function SplashPage() {
   useEffect(() => {
     // 3.2s gives time for the 3s animation to finish before snapping to the next screen
     const timer = setTimeout(() => {
-      if (!isAuthenticated) {
+      if (isAuthenticated && user?.role === 'owner') {
+        router.push('/owner/dashboard');
+      } else if (isAuthenticated && user?.role === 'tenant') {
         router.push('/home');
       } else {
-        const role = user?.role;
-        if (role === 'tenant') {
-          router.push('/tenant/home');
-        } else if (role === 'owner') {
-          router.push('/owner/dashboard');
-        } else {
-          router.push('/home');
-        }
+        router.push('/login');
       }
     }, 3200);
 
