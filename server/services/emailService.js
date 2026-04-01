@@ -1,18 +1,28 @@
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 exports.sendOTPEmail = async (to, otp) => {
-  await transporter.sendMail({
-    from: `"Bnest" <${process.env.EMAIL_USER}>`,
-    to,
-    subject: "Your Bnest OTP Code",
-    html: `<h2>Your OTP is: ${otp}</h2><p>Valid for 5 minutes</p>`,
-  });
+  const data = {
+    service_id: process.env.EMAILJS_SERVICE_ID,
+    template_id: process.env.EMAILJS_TEMPLATE_ID,
+    user_id: process.env.EMAILJS_PUBLIC_KEY,
+    template_params: {
+      to_email: to,      // Ensure your EmailJS template uses {{to_email}} in the "To" field
+      otp_code: otp,     // Ensure your template body uses {{otp_code}}
+      message: `Your OTP is ${otp}. It is valid for 5 minutes.` // Optional fallback variable
+    }
+  };
+
+  try {
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+       const errText = await response.text();
+       throw new Error(`EmailJS Error: ${errText}`);
+    }
+  } catch (error) {
+    console.error("EmailJS Backend Failure:", error);
+    throw error;
+  }
 };
