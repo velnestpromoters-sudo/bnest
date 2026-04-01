@@ -21,7 +21,7 @@ export default function HomeListPage() {
   const handleProfileClick = () => {
     if (!isAuthenticated) return openModal();
     if (user?.role === 'owner') return router.push('/owner/dashboard');
-    if (user?.role === 'tenant') setShowLogoutMenu(!showLogoutMenu);
+    setShowLogoutMenu(!showLogoutMenu);
   };
 
   const handleLogout = () => {
@@ -50,7 +50,7 @@ export default function HomeListPage() {
       </div>
 
       {/* Fixed Logout Popup - Independent of Header Bounds */}
-      {showLogoutMenu && isAuthenticated && user?.role === 'tenant' && (
+      {showLogoutMenu && isAuthenticated && (
           <div className="fixed inset-0 z-[999999]" onClick={() => setShowLogoutMenu(false)}>
               <div 
                 className="absolute top-24 right-5 bg-white/95 backdrop-blur-3xl shadow-2xl rounded-2xl overflow-hidden py-2 w-40 border border-black/5 animate-in fade-in slide-in-from-top-2"

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAuthModalStore } from '@/store/authModalStore';
+import { useAuthStore } from '@/store/authStore';
 import { KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function AuthStepOTP() {
-  const { email, otp, setField, nextStep, prevStep } = useAuthModalStore();
+  const { email, otp, isExistingUser, setField, nextStep, prevStep, reset, closeModal } = useAuthModalStore();
+  const login = useAuthStore((state) => state.login);
   const [error, setError] = useState('');
   const [verifying, setVerifying] = useState(false);
 
@@ -18,15 +20,20 @@ export default function AuthStepOTP() {
     setError('');
     
     try {
-      // In this architecture, we do not verify immediately at step 2 because the prompt mandated POST /auth/login (which is now /verify-otp) happens AFTER name/role collection.
-      // Wait, if verification happens at the end, Step 2 is merely local state capture.
-      // Let's just navigate to next step. Validation happens on definitive submit!
-      
-      setVerifying(false);
-      nextStep();
+      if (isExistingUser) {
+          const response = await api.post('/auth/verify-otp', { email, otp });
+          const { token, data } = response.data;
+          login(token, data);
+          setVerifying(false);
+          reset();
+          closeModal();
+      } else {
+          setVerifying(false);
+          nextStep();
+      }
     } catch (err: any) {
       setVerifying(false);
-      setError('Invalid code');
+      setError(err.response?.data?.message || 'Invalid code');
     }
   };
 

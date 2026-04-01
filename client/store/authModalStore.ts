@@ -9,6 +9,7 @@ interface AuthModalState {
   mobile: string;
   gender: 'male' | 'female' | 'other' | null;
   role: 'tenant' | 'owner' | null;
+  isExistingUser: boolean;
   openModal: () => void;
   closeModal: () => void;
   nextStep: () => void;
@@ -26,11 +27,12 @@ export const useAuthModalStore = create<AuthModalState>((set) => ({
   mobile: '',
   gender: null,
   role: null,
+  isExistingUser: false,
   
   openModal: () => set({ isOpen: true, step: 1 }),
   closeModal: () => set({ isOpen: false }),
   nextStep: () => set((state) => ({ step: state.step + 1 })),
   prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
   setField: (field, value) => set({ [field]: value }),
-  reset: () => set({ email: '', otp: '', name: '', mobile: '', gender: null, role: null, step: 1 })
+  reset: () => set({ email: '', otp: '', name: '', mobile: '', gender: null, role: null, isExistingUser: false, step: 1 })
 }));

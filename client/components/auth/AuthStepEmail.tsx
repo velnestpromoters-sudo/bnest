@@ -18,7 +18,8 @@ export default function AuthStepEmail() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/send-otp', { email });
+      const response = await api.post('/auth/send-otp', { email });
+      setField('isExistingUser', response.data.isExistingUser || false);
       setLoading(false);
       nextStep();
     } catch (err: any) {

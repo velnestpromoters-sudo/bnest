@@ -19,7 +19,10 @@ exports.sendOTP = async (req, res) => {
     await sendOTPEmail(email, otp);
     saveOTP(email, otp);
 
-    res.json({ success: true, message: "OTP sent successfully" });
+    const existingUser = await User.findOne({ email });
+    const isExistingUser = !!existingUser;
+
+    res.json({ success: true, message: "OTP sent successfully", isExistingUser });
   } catch (err) {
     console.error("OTP Send Error:", err);
     res.status(500).json({ success: false, message: err.message });
