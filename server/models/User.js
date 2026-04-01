@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String },
   email: { type: String, unique: true, sparse: true },
   mobile: { type: String, sparse: true },
+  gender: { type: String, enum: ['male', 'female', 'other'], sparse: true },
   role: { type: String, enum: ['tenant', 'owner'] },
   isVerified: { type: Boolean, default: false },
   tenantProfile: {

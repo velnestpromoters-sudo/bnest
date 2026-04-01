@@ -6,6 +6,8 @@ interface AuthModalState {
   email: string;
   otp: string;
   name: string;
+  mobile: string;
+  gender: 'male' | 'female' | 'other' | null;
   role: 'tenant' | 'owner' | null;
   openModal: () => void;
   closeModal: () => void;
@@ -21,6 +23,8 @@ export const useAuthModalStore = create<AuthModalState>((set) => ({
   email: '',
   otp: '',
   name: '',
+  mobile: '',
+  gender: null,
   role: null,
   
   openModal: () => set({ isOpen: true, step: 1 }),
@@ -28,5 +32,5 @@ export const useAuthModalStore = create<AuthModalState>((set) => ({
   nextStep: () => set((state) => ({ step: state.step + 1 })),
   prevStep: () => set((state) => ({ step: Math.max(1, state.step - 1) })),
   setField: (field, value) => set({ [field]: value }),
-  reset: () => set({ email: '', otp: '', name: '', role: null, step: 1 })
+  reset: () => set({ email: '', otp: '', name: '', mobile: '', gender: null, role: null, step: 1 })
 }));

@@ -28,7 +28,7 @@ exports.sendOTP = async (req, res) => {
 
 exports.verifyOTPAndLogin = async (req, res) => {
   try {
-    const { email, otp, name, role } = req.body;
+    const { email, otp, name, role, mobile, gender } = req.body;
 
     const isValid = verifyOTP(email, otp);
     if (!isValid) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
@@ -37,10 +37,12 @@ exports.verifyOTPAndLogin = async (req, res) => {
 
     if (!user) {
       if (!name || !role) return res.status(400).json({ success: false, message: 'Name and role required for user creation' });
-      user = await User.create({ email, name, role });
+      user = await User.create({ email, name, role, mobile, gender });
     } else {
       user.role = role || user.role;
       user.name = name || user.name;
+      user.mobile = mobile || user.mobile;
+      user.gender = gender || user.gender;
       await user.save();
     }
 

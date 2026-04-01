@@ -38,20 +38,20 @@ export default function HomeListPage() {
              <SearchBar />
          </div>
          
-         <div className="relative shrink-0 mb-1">
+         <div className="relative shrink-0 mb-1 z-[9999]">
              <button 
                onClick={handleProfileClick}
-               className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl px-4 py-2.5 rounded-full text-white/90 font-bold text-sm active:scale-95 transition-all flex items-center gap-2"
+               className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl px-4 py-2.5 rounded-full text-white/90 font-bold text-sm hover:bg-white/20 active:scale-95 transition-all flex items-center gap-2"
              >
                <div className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-pulse"></div>
                {isAuthenticated ? (user?.name || 'Tenant') : 'Sign In'}
              </button>
              
              {showLogoutMenu && isAuthenticated && user?.role === 'tenant' && (
-                 <div className="absolute top-full right-0 mt-2 bg-white/90 backdrop-blur-3xl shadow-2xl rounded-2xl overflow-hidden py-1 w-32 border border-white/20 animate-in fade-in slide-in-from-top-2">
+                 <div className="absolute top-[120%] right-0 bg-[#1A1A1A] shadow-2xl rounded-2xl overflow-hidden py-1 w-32 border border-white/10 animate-in fade-in slide-in-from-top-2 z-[99999]">
                      <button 
                          onClick={handleLogout}
-                         className="w-full text-left px-4 py-3 text-red-500 font-bold text-sm hover:bg-red-50 active:bg-red-100 transition-colors"
+                         className="w-full text-left px-4 py-3 text-[#FF3D3D] font-bold text-sm hover:bg-white/5 active:bg-white/10 transition-colors"
                      >
                          Sign Out
                      </button>
