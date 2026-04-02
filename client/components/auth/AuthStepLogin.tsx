@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthModalStore } from '@/store/authModalStore';
 import { useAuthStore } from '@/store/authStore';
-import { Key, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Key, ArrowRight, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function AuthStepLogin() {
@@ -10,6 +10,7 @@ export default function AuthStepLogin() {
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!password) return;
@@ -44,18 +45,26 @@ export default function AuthStepLogin() {
         Enter your permanent password for <span className="text-white font-bold">{email}</span>.
       </p>
 
-      <div className="relative mb-4">
+      <div className="relative mb-4 w-full">
         <input 
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           value={password || ''}
           onChange={(e) => { setField('password', e.target.value); setError(''); }}
           placeholder="Password"
-          className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg px-5 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors text-center"
+          className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg pl-5 pr-12 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors text-center"
           autoFocus
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
         />
-        {error && <p className="text-red-400 text-xs font-bold mt-2 text-center animate-in fade-in">{error}</p>}
+        <button 
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+        >
+          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        </button>
       </div>
+      
+      {error && <p className="text-red-400 text-xs font-bold -mt-2 mb-4 text-center animate-in fade-in">{error}</p>}
 
       <button 
         onClick={handleLogin}

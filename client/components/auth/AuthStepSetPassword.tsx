@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthModalStore } from '@/store/authModalStore';
 import { useAuthStore } from '@/store/authStore';
-import { Lock, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Lock, ArrowRight, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function AuthStepSetPassword() {
@@ -11,6 +11,8 @@ export default function AuthStepSetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async () => {
     if (!password || password.length < 6) {
@@ -60,24 +62,46 @@ export default function AuthStepSetPassword() {
         Set a permanent password so you never need an OTP again.
       </p>
 
-      <div className="relative mb-4 flex flex-col gap-3">
-        <input 
-          type="password"
-          value={password || ''}
-          onChange={(e) => { setField('password', e.target.value); setError(''); }}
-          placeholder="New Password"
-          className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg px-5 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors"
-          autoFocus
-        />
-        <input 
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
-          placeholder="Confirm Password"
-          className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg px-5 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors"
-        />
-        {error && <p className="text-red-400 text-xs font-bold mt-2 text-center animate-in fade-in">{error}</p>}
+      <div className="relative flex flex-col gap-3 mb-4">
+        
+        <div className="relative w-full">
+          <input 
+            type={showPassword ? 'text' : 'password'}
+            value={password || ''}
+            onChange={(e) => { setField('password', e.target.value); setError(''); }}
+            placeholder="New Password"
+            className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg pl-5 pr-12 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors text-center"
+            autoFocus
+          />
+          <button 
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+
+        <div className="relative w-full">
+          <input 
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+            placeholder="Confirm Password"
+            className="w-full bg-black/40 border border-white/20 text-white font-bold text-lg pl-5 pr-12 py-4 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors text-center"
+          />
+          <button 
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+          >
+            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+        
       </div>
+      
+      {error && <p className="text-red-400 text-xs font-bold mb-4 text-center animate-in fade-in">{error}</p>}
 
       <button 
         onClick={handleSubmit}
