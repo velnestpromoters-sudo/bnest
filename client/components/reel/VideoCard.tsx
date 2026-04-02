@@ -127,15 +127,8 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
          </div>
       )}
 
-      {/* Top Right: Match Badge */}
+      {/* Top Right: Actions Container */}
       <div className="absolute top-[96px] right-4 pointer-events-none z-10 flex flex-col gap-4">
-        <div className="flex flex-col items-center bg-black/40 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-lg pointer-events-auto">
-          <div className="bg-emerald-500 text-white rounded-full p-1.5 mb-1 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-            <Percent className="w-3.5 h-3.5" />
-          </div>
-          <span className="text-white font-black text-xs">{matchScore}%</span>
-          <span className="text-white/70 font-bold text-[9px] uppercase tracking-widest mt-0.5">Match</span>
-        </div>
         
         {/* Native OS Share Sheet Launcher Button */}
         <button 
