@@ -61,7 +61,12 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     fetchProperty();
   }, [id, isAuthenticated, role]);
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return (
+    <div className="h-screen bg-slate-50 flex flex-col items-center justify-center">
+       <div className="w-12 h-12 border-4 border-[#FF6A3D] border-t-transparent rounded-full animate-spin mb-4" />
+       <p className="text-slate-400 font-medium animate-pulse">Loading property details...</p>
+    </div>
+  );
   if (!property) return <div className="h-screen flex items-center justify-center">Not Found</div>;
 
   return (
@@ -119,8 +124,33 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         ) : (
           <div className="mt-8 space-y-6 animate-in slide-in-from-bottom-2 fade-in">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-green-500" /> Contact Unlocked
+                <ShieldCheck className="w-5 h-5 text-green-500" /> Contact
             </h3>
+            
+            {/* Core Property Details Extracted */}
+            <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 grid grid-cols-2 gap-y-4 gap-x-2 mb-4">
+               <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">BHK Type</p>
+                  <p className="font-bold text-slate-800 text-sm">{property.bhkType || 'BHK Unavailable'}</p>
+               </div>
+               <div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Bachelors</p>
+                  <p className="font-bold text-slate-800 text-sm">{property.preferences?.bachelorAllowed ? 'Allowed' : 'Not Allowed'}</p>
+               </div>
+               <div className="col-span-2 mt-1">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Exact Address</p>
+                  <p className="font-bold text-slate-800 text-sm">{property.location?.address || 'Address hidden by owner'}</p>
+               </div>
+               {property.location?.googleMapLink && (
+                 <div className="col-span-2 mt-1">
+                    <a href={property.location.googleMapLink} target="_blank" rel="noreferrer" className="text-[#FF6A3D] text-sm font-bold flex items-center gap-1 hover:underline">
+                       <MapPin className="w-4 h-4" /> Open in Google Maps
+                    </a>
+                 </div>
+               )}
+            </div>
+
+            {/* Owner Details */}
              <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Owner Credentials</p>
                 <p className="font-black text-slate-800 text-xl mb-1">{property.ownerId?.name || 'Verified Owner'}</p>

@@ -17,9 +17,9 @@ exports.getProperty = async (req, res) => {
     }
 
     // Role-based payload filtering
-    const isTenant = req.user && req.user.role === 'tenant';
+    const isAuthenticated = req.user != null;
     
-    if (isTenant) {
+    if (isAuthenticated) {
       // Full details (requires owner population or deeper fields)
       const fullProperty = await Property.findById(req.params.id).populate('ownerId', 'name mobile isVerified');
       return res.status(200).json({ success: true, data: fullProperty, access: 'full' });
