@@ -10,59 +10,19 @@ import { useAuthStore } from '@/store/authStore';
 import { useLocationStore } from '@/store/locationStore';
 import { useAuthModalStore } from '@/store/authModalStore';
 
-// Mock Data: 5 Vertical Video Properties
-const MOCK_REELS = [
-  {
-    id: 'prop_101',
-    video: 'https://cdn.pixabay.com/video/2019/07/26/25556-351147055_tiny.mp4',
-    images: ['/mockups/exterior.png', '/mockups/living.png', '/mockups/bed.png'],
-    rent: 25000,
-    area: 'RSpuram',
-    district: 'Coimbatore',
-    matchScore: 98,
-    moveInReady: true,
-  },
-  {
-    id: 'prop_102',
-    video: 'https://cdn.pixabay.com/video/2019/11/05/28807-372134591_tiny.mp4',
-    images: ['https://images.unsplash.com/photo-1560184897-ae75f418c935?w=400', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400', 'https://images.unsplash.com/photo-1620626011761-9ea018903148?w=400'],
-    rent: 18000,
-    area: 'Saibaba Colony',
-    district: 'Coimbatore',
-    matchScore: 85,
-    moveInReady: false,
-  },
-  {
-    id: 'prop_103',
-    video: 'https://cdn.pixabay.com/video/2019/10/22/28169-368595604_tiny.mp4',
-    images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400', 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400', 'https://images.unsplash.com/photo-1600607687931-5781ebca4205?w=400'],
-    rent: 32000,
-    area: 'Peelamedu',
-    district: 'Coimbatore',
-    matchScore: 92,
-    moveInReady: true,
-  },
-  {
-    id: 'prop_104',
-    video: 'https://cdn.pixabay.com/video/2021/08/25/86278-592659102_tiny.mp4',
-    images: ['https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=400', 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=400', 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'],
-    rent: 15000,
-    area: 'Ganapathy',
-    district: 'Coimbatore',
-    matchScore: 88,
-    moveInReady: true,
-  },
-  {
-    id: 'prop_105',
-    video: 'https://cdn.pixabay.com/video/2020/06/17/42240-431878345_tiny.mp4',
-    images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400', 'https://images.unsplash.com/photo-1600585154526-990dced4ea0d?w=400', 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=400'],
-    rent: 45000,
-    area: 'Race Course',
-    district: 'Coimbatore',
-    matchScore: 99,
-    moveInReady: true,
-  }
-];
+import api from '@/lib/api';
+
+interface PropertyFeedData {
+  _id: string;
+  images: string[];
+  rent: number;
+  location: {
+    area?: string;
+    city?: string;
+  };
+  matchScore?: number;
+  moveInReady?: boolean;
+}
 
 export default function HomeReelPage() {
   const router = useRouter();
@@ -87,6 +47,25 @@ export default function HomeReelPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const { locationName, setLocation } = useLocationStore();
+  const [properties, setProperties] = useState<PropertyFeedData[]>([]);
+  const [isLoadingFeed, setIsLoadingFeed] = useState(true);
+
+  // Sync API Properties
+  useEffect(() => {
+    const loadFeed = async () => {
+      try {
+        const res = await api.get('/properties');
+        if (res.data.success) {
+          setProperties(res.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load property feed", err);
+      } finally {
+        setIsLoadingFeed(false);
+      }
+    };
+    loadFeed();
+  }, []);
 
   // 1. Dual-Fallback Geolocation Architecture (Mappls Proxy -> BigDataCloud)
   useEffect(() => {
@@ -163,20 +142,32 @@ export default function HomeReelPage() {
         className="w-full h-full overflow-y-auto snap-y snap-mandatory scroll-smooth no-scrollbar"
         style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
       >
-        {MOCK_REELS.map((reel, index) => (
-          <VideoCard 
-            key={reel.id}
-            id={reel.id}
-            video={reel.video}
-            images={reel.images}
-            rent={reel.rent}
-            area={reel.area}
-            district={reel.district}
-            matchScore={reel.matchScore}
-            moveInReady={reel.moveInReady}
-            isActive={index === activeSlide}
-          />
-        ))}
+        {isLoadingFeed ? (
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-4 border-[#FF6A3D] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-white/60 font-medium animate-pulse">Loading amazing homes...</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-5 text-center">
+            <h2 className="text-2xl font-black text-white mb-2">No Homes Nearby</h2>
+            <p className="text-white/50 text-sm">Be the first to list a property in your city.</p>
+          </div>
+        ) : (
+          properties.map((reel, index) => (
+            <VideoCard 
+              key={reel._id || index.toString()}
+              id={reel._id}
+              video="" // Video disabled in favor of photo arrays
+              images={reel.images}
+              rent={reel.rent}
+              area={reel.location?.area || 'Unknown Area'}
+              district={reel.location?.city || 'Unknown City'}
+              matchScore={reel.matchScore || 0}
+              moveInReady={Boolean(reel.moveInReady)}
+              isActive={index === activeSlide}
+            />
+          ))
+        )}
       </div>
 
       <BottomBar location={locationName} viewMode="reel" />
