@@ -61,9 +61,9 @@ export default function OwnerDashboard() {
         <div className="flex gap-4 mt-4 md:mt-0 items-center">
            <button 
               onClick={() => router.push('/home')}
-              className="text-[#FF5A1F] font-black hover:bg-orange-50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+              className="text-[#FF5A1F] font-bold text-base hover:bg-orange-50 px-4 py-2.5 rounded-full transition-colors cursor-pointer"
            >
-             Reels
+             Home
            </button>
            <button 
               onClick={() => router.push('/owner/add-property/step-1')}
