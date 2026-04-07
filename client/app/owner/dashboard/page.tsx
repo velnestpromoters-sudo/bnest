@@ -108,22 +108,36 @@ export default function OwnerDashboard() {
         ) : (
           <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'thin' }}>
              {properties.map((prop: any) => (
-                <div key={prop._id} className="bg-white p-3 rounded-xl border border-gray-200 flex flex-col gap-3 min-w-[220px] max-w-[220px] snap-center shrink-0 shadow-sm relative transition-transform hover:-translate-y-1">
-                   <div className="absolute top-4 right-4 z-10 px-2 py-0.5 bg-green-100/90 backdrop-blur-sm text-green-700 text-[10px] uppercase tracking-wider font-bold rounded-full shadow-sm border border-green-200">
-                      Active
-                   </div>
-                   <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                <div key={prop._id} className="relative rounded-2xl overflow-hidden flex flex-col justify-end min-w-[200px] h-[340px] snap-center shrink-0 shadow-lg border border-gray-200/50 transition-transform hover:-translate-y-1">
+                   
+                   {/* Full Background Image */}
+                   <div className="absolute inset-0 bg-gray-900 border border-black/10">
                       {prop.images && prop.images[0] ? (
                          <img src={prop.images[0]} alt="Property" className="w-full h-full object-cover" />
                       ) : (
-                         <span className="text-xs text-gray-400 flex items-center justify-center w-full h-full">No Image</span>
+                         <div className="flex items-center justify-center w-full h-full text-white/30 text-xs font-bold">No Image</div>
                       )}
                    </div>
-                   <div className="flex flex-col px-1">
-                      <h4 className="font-bold text-gray-900 line-clamp-1 text-sm">{prop.title}</h4>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 font-medium">{prop.location?.area || 'Area not specified'}</p>
-                      <p className="text-[#801786] font-black mt-2">₹{prop.rent.toLocaleString()}<span className="text-xs font-semibold text-gray-400">/mo</span></p>
+
+                   {/* Dark Gradient Overlay for text readability (Reel style) */}
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent pointer-events-none" />
+
+                   {/* Floating Top Right Tag */}
+                   <div className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-green-500/30 backdrop-blur-md text-green-300 text-[10px] uppercase tracking-wider font-black rounded-full shadow-lg border border-green-500/40">
+                      Active
                    </div>
+
+                   {/* Bottom Overlaid Text Block */}
+                   <div className="relative z-10 p-4 flex flex-col pb-5">
+                      <p className="text-white text-xl font-black drop-shadow-md tracking-tight">₹{prop.rent.toLocaleString()}<span className="text-xs text-white/80 font-medium ml-0.5">/mo</span></p>
+                      <h4 className="font-bold text-white text-[15px] line-clamp-1 mt-1 drop-shadow-md">{prop.title}</h4>
+                      
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                         <svg className="w-3.5 h-3.5 text-[#ec38b7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                         <p className="text-xs text-white/90 line-clamp-1 font-medium drop-shadow-md">{prop.location?.area || 'Area not specified'}</p>
+                      </div>
+                   </div>
+
                 </div>
              ))}
           </div>
