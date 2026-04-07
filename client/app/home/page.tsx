@@ -145,8 +145,8 @@ export default function HomeReelPage() {
     <div className="relative w-full h-[100dvh] bg-black overflow-hidden">
       
       {/* Header Logo */}
-      <div className="absolute top-0 left-0 right-0 z-[50] p-5 mt-2 flex items-center justify-start pointer-events-none">
-         <img src="/logo.svg" alt="Homyvo Logo" className="h-10 w-auto drop-shadow-lg" />
+      <div className="absolute top-0 left-0 right-0 z-[50] p-4 mt-1 flex items-center justify-start pointer-events-none">
+         <img src="/logo.svg" alt="Homyvo Logo" className="h-20 w-auto scale-150 origin-top-left drop-shadow-lg" />
       </div>
 
       {/* Snap Container */}
