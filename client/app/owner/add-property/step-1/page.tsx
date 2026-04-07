@@ -6,7 +6,7 @@ import { usePropertyFormStore } from '@/store/usePropertyFormStore';
 
 export default function Step1() {
   const router = useRouter();
-  const { title, rent, deposit, bhkType, updateField } = usePropertyFormStore();
+  const { title, rent, deposit, bhkType, propertyType, updateField } = usePropertyFormStore();
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +19,26 @@ export default function Step1() {
        <p className="text-sm text-gray-500 mb-8">Let's start with the core numbers.</p>
 
        <form onSubmit={handleNext} className="flex flex-col gap-6">
+          <div>
+             <label className="block text-sm font-bold text-gray-700 mb-2">Property Type *</label>
+             <div className="grid grid-cols-2 gap-4">
+                <button 
+                  type="button"
+                  onClick={() => updateField('propertyType', 'apartment')}
+                  className={`p-4 border-2 rounded-xl font-bold flex flex-col items-center justify-center gap-2 transition-colors ${propertyType === 'apartment' ? 'border-[#801786] bg-purple-50 text-[#801786]' : 'border-gray-200 text-gray-500 hover:border-purple-200'}`}
+                >
+                   Apartment
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => updateField('propertyType', 'pg')}
+                  className={`p-4 border-2 rounded-xl font-bold flex flex-col items-center justify-center gap-2 transition-colors ${propertyType === 'pg' ? 'border-[#801786] bg-purple-50 text-[#801786]' : 'border-gray-200 text-gray-500 hover:border-purple-200'}`}
+                >
+                   PG / Co-living
+                </button>
+             </div>
+          </div>
+
           <div>
              <label className="block text-sm font-bold text-gray-700 mb-2">Property Title *</label>
              <input 

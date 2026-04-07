@@ -12,13 +12,28 @@ interface PreferencesData {
   maxOccupants: string;
 }
 
+interface PgDetailsData {
+  gender: 'boys' | 'girls' | 'co-living' | '';
+  totalRooms: string;
+  sharingTypes: number[];
+  rooms: {
+    sharing: number;
+    totalBeds: string;
+    availableBeds: string;
+  }[];
+}
+
 interface PropertyFormState {
   // Step 1: Basic
+  propertyType: 'apartment' | 'pg';
   title: string;
   rent: string;
   deposit: string;
   bhkType: string;
   
+  // PG Specific
+  pgDetails: PgDetailsData;
+
   // Step 2: Location
   location: LocationData;
   
@@ -33,12 +48,20 @@ interface PropertyFormState {
   updateField: (field: string, value: any) => void;
   updateLocation: (field: keyof LocationData, value: string) => void;
   updatePreference: (field: keyof PreferencesData, value: any) => void;
+  updatePgDetails: (field: keyof PgDetailsData, value: any) => void;
   setImages: (newImages: File[]) => void;
   resetForm: () => void;
 }
 
 const initialState = {
+  propertyType: 'apartment' as 'apartment' | 'pg',
   title: '', rent: '', deposit: '', bhkType: '',
+  pgDetails: {
+    gender: '' as '',
+    totalRooms: '',
+    sharingTypes: [],
+    rooms: []
+  },
   location: { address: '', area: '', city: '', googleMapLink: '' },
   preferences: { bachelorAllowed: true, maxOccupants: '1' },
   moveInReady: false,
@@ -58,6 +81,11 @@ export const usePropertyFormStore = create<PropertyFormState>((set) => ({
   updatePreference: (field, value) => set((state) => ({
     ...state,
     preferences: { ...state.preferences, [field]: value }
+  })),
+
+  updatePgDetails: (field, value) => set((state) => ({
+    ...state,
+    pgDetails: { ...state.pgDetails, [field]: value }
   })),
   
   setImages: (newImages) => set((state) => ({

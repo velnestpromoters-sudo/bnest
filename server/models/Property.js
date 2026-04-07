@@ -19,6 +19,17 @@ const propertySchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   matchScore: { type: Number, default: 0 },
   moveInReady: { type: Boolean, default: false },
+  propertyType: { type: String, enum: ['apartment', 'pg'], default: 'apartment' },
+  pgDetails: {
+    gender: { type: String, enum: ['boys', 'girls', 'co-living'] },
+    totalRooms: Number,
+    sharingTypes: [Number],
+    rooms: [{
+        sharing: Number,
+        totalBeds: Number,
+        availableBeds: Number
+    }]
+  },
   preferences: {
     bachelorAllowed: Boolean,
     maxOccupants: Number

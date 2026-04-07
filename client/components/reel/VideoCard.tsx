@@ -17,11 +17,13 @@ interface VideoCardProps {
   bhkType?: string;
   bachelorsAllowed?: boolean;
   distanceKm?: number;
+  propertyType?: 'apartment' | 'pg';
+  pgDetails?: any;
 }
 
 export default function VideoCard({ 
   id, video, images, rent, area, district, matchScore, moveInReady, isActive, 
-  bhkType, bachelorsAllowed, distanceKm 
+  bhkType, bachelorsAllowed, distanceKm, propertyType, pgDetails
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
@@ -93,6 +95,32 @@ export default function VideoCard({
       }
   };
 
+  // --- PG Display Logic System ---
+  const isPg = propertyType === 'pg';
+  let bestPgSharingStr = "";
+  let bestPgBedStr = "";
+  let pgGenderStr = "";
+
+  if (isPg && pgDetails) {
+      pgGenderStr = pgDetails.gender === 'boys' ? 'Boys PG' : pgDetails.gender === 'girls' ? 'Girls PG' : 'Co-living PG';
+      
+      if (pgDetails.rooms && pgDetails.rooms.length > 0) {
+         // Sort by highest available beds to highlight the best option
+         const bestRoom = [...pgDetails.rooms].sort((a, b) => b.availableBeds - a.availableBeds)[0];
+         
+         if (pgDetails.rooms.length > 1) {
+            // Multi-sharing case summary
+            const sortedSharing = [...pgDetails.sharingTypes].sort();
+            bestPgSharingStr = `${sortedSharing.join(',')} Sharing Available`;
+            bestPgBedStr = `Up to ${bestRoom.availableBeds} beds available`;
+         } else {
+            // Single sharing case exactly as requested
+            bestPgSharingStr = `${bestRoom.sharing} Sharing`;
+            bestPgBedStr = `${bestRoom.availableBeds} Beds Available`;
+         }
+      }
+  }
+
   return (
     <div className="relative w-full h-[100dvh] bg-black snap-start snap-always shrink-0 overflow-hidden">
       
@@ -112,14 +140,14 @@ export default function VideoCard({
                 <img 
                     src={mediaSrc} 
                     className="w-full h-full object-cover pointer-events-none" 
-                    alt="Property Exterior/Interior View"
+                    alt="Property View"
                 />
              </div>
           ))}
       </div>
 
       {/* Dark Overlay Gradient (Better text readability for the bottom text) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/30 pointer-events-none" />
 
       {/* Top Carousel Pagination Dots (Tinder-style) */}
       {mediaList.length > 1 && (
@@ -135,8 +163,6 @@ export default function VideoCard({
 
       {/* Top Right: Actions Container */}
       <div className="absolute top-[96px] right-4 pointer-events-none z-10 flex flex-col gap-4">
-        
-        {/* Native OS Share Sheet Launcher Button */}
         <button 
           onClick={handleShare}
           className="flex flex-col items-center pointer-events-auto active:scale-90 transition-transform mt-2"
@@ -151,28 +177,49 @@ export default function VideoCard({
       {/* Bottom overlay: Property details */}
       <div className="absolute bottom-[90px] left-0 right-0 px-5 mb-2 z-10 flex flex-col justify-end pointer-events-auto">
         
-        {/* Title / Rent */}
-        <h2 className="text-white text-3xl font-black mb-1 drop-shadow-md">
-          ₹{rent.toLocaleString()} <span className="text-lg text-white/80 font-semibold">/mo</span>
+        {/* Title / Rent / Sharing */}
+        <h2 className="text-white text-3xl font-black mb-1 drop-shadow-md flex items-end gap-2">
+          {isPg && <span className="text-[#ec38b7] text-2xl tracking-tight">PG • {bestPgSharingStr}</span>}
+          {!isPg && <>₹{rent.toLocaleString()} <span className="text-lg text-white/80 font-semibold mb-0.5">/mo</span></>}
         </h2>
         
+        {/* PG Rent Fallback if PG replaces Rent Title */}
+        {isPg && (
+            <p className="text-white font-black text-xl mb-1 mt-0.5 drop-shadow-md">
+                ₹{rent.toLocaleString()} <span className="text-sm font-semibold text-white/80">/mo average rent</span>
+            </p>
+        )}
+
         {/* Location & Distance */}
-        <div className="flex flex-wrap items-center gap-1.5 text-white/90 mb-3 font-medium">
+        <div className="flex flex-wrap items-center gap-1.5 text-white/90 mb-2 font-bold drop-shadow-md">
           <MapPin className="w-4 h-4 text-[#ec38b7]" />
           <span>{area}, {district}</span>
           {distanceKm !== undefined && (
-            <span className="text-white/60 ml-0.5">• <strong className="text-white/90">{distanceKm.toFixed(1)} km</strong> away</span>
+            <span className="text-white/70 ml-0.5">• <strong className="text-white">{distanceKm.toFixed(1)} km</strong> away</span>
           )}
         </div>
 
+        {/* PG Specific Sub-Details */}
+        {isPg && (
+            <div className="text-emerald-300 font-bold mb-3 flex items-center gap-2 drop-shadow-md">
+                <CheckCircle className="w-4 h-4" />
+                {bestPgBedStr}
+            </div>
+        )}
+
         {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {bhkType && (
+        <div className="flex flex-wrap gap-2 mt-1">
+          {isPg && (
+            <div className="bg-[#801786]/70 backdrop-blur-md border border-white/20 text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg flex items-center gap-1.5">
+               {pgGenderStr}
+            </div>
+          )}
+          {!isPg && bhkType && (
             <div className="bg-white/15 backdrop-blur-md border border-white/30 text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg">
               {bhkType}
             </div>
           )}
-          {bachelorsAllowed && (
+          {!isPg && bachelorsAllowed && (
             <div className="bg-[#801786]/60 backdrop-blur-md border border-[#801786] text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg">
               Bachelor Allowed
             </div>

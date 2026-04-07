@@ -2,7 +2,7 @@ const Property = require('../models/Property');
 
 exports.getAllProperties = async (req, res) => {
   try {
-    const properties = await Property.find({ isActive: true }).select('title location rent images matchScore moveInReady isVerified ownerId bhkType preferences');
+    const properties = await Property.find({ isActive: true }).select('title location rent images matchScore moveInReady isVerified ownerId bhkType preferences propertyType pgDetails');
     res.status(200).json({ success: true, data: properties });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -62,9 +62,11 @@ exports.createProperty = async (req, res) => {
 
     let parsedLocation = {};
     let parsedPreferences = {};
+    let parsedPgDetails = undefined;
     try {
         if (req.body.location) parsedLocation = JSON.parse(req.body.location);
         if (req.body.preferences) parsedPreferences = JSON.parse(req.body.preferences);
+        if (req.body.pgDetails) parsedPgDetails = JSON.parse(req.body.pgDetails);
     } catch(e) { console.error("Error parsing JSON body fields:", e); }
 
     const newProperty = await Property.create({
@@ -73,8 +75,10 @@ exports.createProperty = async (req, res) => {
       deposit: req.body.deposit,
       bhkType: req.body.bhkType,
       moveInReady: req.body.moveInReady === 'true',
+      propertyType: req.body.propertyType || 'apartment',
       location: parsedLocation,
       preferences: parsedPreferences,
+      pgDetails: req.body.propertyType === 'pg' ? parsedPgDetails : undefined,
       images: imageUrls,
       ownerId: req.user._id,
     });

@@ -28,6 +28,17 @@ interface PropertyFeedData {
   preferences?: {
     bachelorAllowed?: boolean;
   };
+  propertyType?: 'apartment' | 'pg';
+  pgDetails?: {
+    gender: 'boys' | 'girls' | 'co-living';
+    totalRooms: number;
+    sharingTypes: number[];
+    rooms: {
+      sharing: number;
+      totalBeds: number;
+      availableBeds: number;
+    }[];
+  };
 }
 
 export default function HomeReelPage() {
@@ -188,6 +199,8 @@ export default function HomeReelPage() {
                 bhkType={reel.bhkType}
                 bachelorsAllowed={Boolean(reel.preferences?.bachelorAllowed)}
                 distanceKm={distance}
+                propertyType={reel.propertyType}
+                pgDetails={reel.pgDetails}
               />
             )
           })

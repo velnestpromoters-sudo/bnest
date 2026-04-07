@@ -24,6 +24,12 @@ export default function Step5() {
        formData.append('bhkType', formState.bhkType);
        formData.append('moveInReady', formState.moveInReady.toString());
        
+       // PG Updates
+       formData.append('propertyType', formState.propertyType);
+       if (formState.propertyType === 'pg') {
+          formData.append('pgDetails', JSON.stringify(formState.pgDetails));
+       }
+       
        // Encode objects into flat strings for FormData translation
        formData.append('location', JSON.stringify(formState.location));
        formData.append('preferences', JSON.stringify(formState.preferences));
