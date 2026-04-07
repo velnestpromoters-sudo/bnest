@@ -18,14 +18,18 @@ export default function CinematicSplash({ onComplete }: { onComplete: () => void
       {/* 1. White Background completely closed off entirely until the shutter opens! */}
       <div className="absolute inset-0 bg-white z-0" />
       
-      {/* Target Logo to slowly reveal */}
+      {/* Target Logo to slowly reveal (Removed blur filter to prevent Webkit/iOS SVG invisibility bugs) */}
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }} 
-        className="relative z-10 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center"
+        transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }} 
+        className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none m-auto"
       >
-        <img src="/logo.svg" alt="Homyvo Logo" className="w-full h-full object-contain" />
+        <img 
+          src="/logo.svg" 
+          alt="Homyvo Logo" 
+          className="w-48 h-48 md:w-64 md:h-64 object-contain" 
+        />
       </motion.div>
 
       {/* 2. Full Purple Canvas (5 closed diagonal blocks) */}
