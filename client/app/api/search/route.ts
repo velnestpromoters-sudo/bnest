@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const response = await fetch(photonUrl, {
         headers: {
             'Accept-Language': 'en',
-            'User-Agent': 'Bnest-Property-App/1.0 (Development Server)'
+            'User-Agent': 'Homyvo-Property-App/1.0 (Development Server)'
         }
     });
 

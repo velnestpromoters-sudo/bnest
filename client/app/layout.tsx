@@ -8,7 +8,7 @@ const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'bnest | Verified Homes. Trusted Living.',
+  title: 'homyvo | Verified Homes. Trusted Living.',
   description: 'Clean, mobile-first rental platform',
 }
 

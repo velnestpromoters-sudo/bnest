@@ -86,7 +86,7 @@ export default function Step5() {
              <ul className="text-xs text-gray-600 list-disc pl-4 space-y-2 mb-4">
                  <li>Owner must provide legally real properties only. Zero fake listings allowed.</li>
                  <li>All property availability must be heavily updated to ensure tenant clarity.</li>
-                 <li>Bnest Platform is explicitly not responsible for external offline owner-tenant disputes.</li>
+                 <li>Homyvo Platform is explicitly not responsible for external offline owner-tenant disputes.</li>
                  <li>Deposits must be returned fairly adhering to standard eviction laws.</li>
              </ul>
              <label className="flex items-start gap-3 mt-4 cursor-pointer">

@@ -40,7 +40,7 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
           if (navigator.share) {
               await navigator.share({
                   title: `Beautiful Property in ${area}, ${district}`,
-                  text: `Check out this amazing home in ${area} for ₹${rent.toLocaleString()}/mo on Bnest!`,
+                  text: `Check out this amazing home in ${area} for ₹${rent.toLocaleString()}/mo on Homyvo!`,
                   url: window.location.origin + `/property/${id}`
               });
           } else {

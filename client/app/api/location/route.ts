@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`, {
         headers: {
             'Accept-Language': 'en',
-            'User-Agent': 'Bnest-Property-App/1.0 (Development)'
+            'User-Agent': 'Homyvo-Property-App/1.0 (Development)'
         }
     });
 

@@ -24,7 +24,7 @@ export default function AuthStepDetails() {
       
       <h2 className="text-2xl font-black text-white mb-2 tracking-tight text-center">Your Details</h2>
       <p className="text-white/50 text-sm font-medium mb-6 leading-relaxed text-center">
-        Enhance your Bnest experience with a tailored profile.
+        Enhance your Homyvo experience with a tailored profile.
       </p>
 
       {/* Inputs Container */}
