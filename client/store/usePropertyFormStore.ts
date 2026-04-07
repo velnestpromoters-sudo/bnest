@@ -30,6 +30,7 @@ interface PropertyFormState {
   rent: string;
   deposit: string;
   bhkType: string;
+  tenantNotes: string;
   
   // PG Specific
   pgDetails: PgDetailsData;
@@ -55,7 +56,7 @@ interface PropertyFormState {
 
 const initialState = {
   propertyType: 'apartment' as 'apartment' | 'pg',
-  title: '', rent: '', deposit: '', bhkType: '',
+  title: '', rent: '', deposit: '', bhkType: '', tenantNotes: '',
   pgDetails: {
     gender: '' as '',
     totalRooms: '',

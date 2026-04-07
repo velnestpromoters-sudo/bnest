@@ -191,21 +191,25 @@ export default function OwnerDashboard() {
                         setIsUpdatingAvailability(true);
                         const token = useAuthStore.getState().token;
                         
-                        let payload = {};
+                        let payload: any = {};
                         if (availabilityModalData.propertyType === 'pg') {
                            // Extract dynamic values directly off the form elements
                            const formEl = e.currentTarget;
-                           const inputs = Array.from(formEl.querySelectorAll('input[type="number"]')) as HTMLInputElement[];
+                           const inputs = Array.from(formEl.querySelectorAll('.bed-input')) as HTMLInputElement[];
                            const mappedRooms = inputs.map(input => ({
                                sharing: Number(input.dataset.sharing),
                                availableBeds: Number(input.value)
                            }));
-                           payload = { rooms: mappedRooms };
+                           payload.rooms = mappedRooms;
                         } else {
                            // Apartment Boolean
                            const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                           payload = { moveInReady: checkbox.checked };
+                           payload.moveInReady = checkbox.checked;
                         }
+
+                        // Attach Tenant Notes safely
+                        const notesArea = e.currentTarget.querySelector('textarea') as HTMLTextAreaElement;
+                        payload.tenantNotes = notesArea.value;
 
                         const res = await fetch(`/api/properties/${availabilityModalData._id}/availability`, {
                            method: 'PUT',
@@ -223,7 +227,7 @@ export default function OwnerDashboard() {
                            setAvailabilityModalData(null);
                         } else {
                            console.error(data.message);
-                           alert("Failed to update availability");
+                           alert("Failed to update details");
                         }
                      } catch(err) {
                         console.error(err);
@@ -249,7 +253,7 @@ export default function OwnerDashboard() {
                                  max={room.totalBeds}
                                  min={0}
                                  required
-                                 className="w-16 p-2 text-center border-2 border-gray-200 rounded-lg font-bold text-[#ec38b7] outline-none focus:border-[#ec38b7]"
+                                 className="bed-input w-16 p-2 text-center border-2 border-gray-200 rounded-lg font-bold text-[#ec38b7] outline-none focus:border-[#ec38b7]"
                               />
                            </div>
                         ))}
@@ -271,12 +275,23 @@ export default function OwnerDashboard() {
                      </div>
                   )}
 
+                  <div className="flex flex-col gap-1.5 mt-2">
+                     <p className="font-bold text-gray-800 text-sm">Notes for Tenants</p>
+                     <textarea 
+                        rows={3} 
+                        defaultValue={availabilityModalData.tenantNotes}
+                        className="w-full border p-3 rounded-xl bg-white focus:outline-none focus:border-[#801786] text-sm text-gray-700" 
+                        placeholder="e.g. Vegetarian only, quiet hours..." 
+                        style={{ resize: 'none' }}
+                     />
+                  </div>
+
                   <button 
                      disabled={isUpdatingAvailability}
                      type="submit" 
                      className="mt-2 w-full bg-[#801786] hover:bg-[#a420ac] text-white font-black py-3.5 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
                   >
-                     {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
+                     {isUpdatingAvailability ? 'Saving...' : 'Save Updates'}
                   </button>
                </form>
             </div>

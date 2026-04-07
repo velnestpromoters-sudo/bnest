@@ -6,7 +6,7 @@ import { usePropertyFormStore } from '@/store/usePropertyFormStore';
 
 export default function Step3() {
   const router = useRouter();
-  const { propertyType, pgDetails, preferences, moveInReady, updateField, updatePreference, updatePgDetails } = usePropertyFormStore();
+  const { propertyType, pgDetails, preferences, moveInReady, tenantNotes, updateField, updatePreference, updatePgDetails } = usePropertyFormStore();
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +162,19 @@ export default function Step3() {
                 </div>
              </>
           )}
+
+          <div className="bg-white p-5 border-2 rounded-xl flex flex-col shadow-sm gap-2">
+             <label className="block text-sm font-bold text-gray-800">Special Notes for Tenants (Optional)</label>
+             <p className="text-xs text-gray-500 mb-1">E.g., "Veg only", "Gate closes at 10 PM", "Quiet hours after 11 PM"</p>
+             <textarea 
+                rows={3}
+                value={tenantNotes}
+                onChange={(e) => updateField('tenantNotes', e.target.value)}
+                placeholder="Write any special instructions here..."
+                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#801786] focus:ring-0 outline-none bg-slate-50 transition-colors"
+                style={{ resize: 'none' }}
+             />
+          </div>
 
           <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-10 md:static md:bg-transparent md:border-0 md:p-0 md:mt-4">
              <button type="submit" className="w-full bg-[#801786] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#a61c92] transition-colors">

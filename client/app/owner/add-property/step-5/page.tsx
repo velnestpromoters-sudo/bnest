@@ -22,6 +22,7 @@ export default function Step5() {
        formData.append('rent', formState.rent);
        formData.append('deposit', formState.deposit);
        formData.append('bhkType', formState.bhkType);
+       formData.append('tenantNotes', formState.tenantNotes || '');
        formData.append('moveInReady', formState.moveInReady.toString());
        
        // PG Updates

@@ -2,7 +2,7 @@ const Property = require('../models/Property');
 
 exports.getAllProperties = async (req, res) => {
   try {
-    const properties = await Property.find({ isActive: true }).select('title location rent images matchScore moveInReady isVerified ownerId bhkType preferences propertyType pgDetails');
+    const properties = await Property.find({ isActive: true }).select('title location rent images matchScore moveInReady isVerified ownerId bhkType preferences propertyType pgDetails tenantNotes');
     res.status(200).json({ success: true, data: properties });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -35,7 +35,8 @@ exports.getProperty = async (req, res) => {
         images: property.images.slice(0, 1), // Only 1 image
         isVerified: property.isVerified,
         matchScore: property.matchScore,
-        moveInReady: property.moveInReady
+        moveInReady: property.moveInReady,
+        tenantNotes: property.tenantNotes
       };
       return res.status(200).json({ success: true, data: limitedProperty, access: 'limited' });
     }
@@ -79,6 +80,7 @@ exports.createProperty = async (req, res) => {
       location: parsedLocation,
       preferences: parsedPreferences,
       pgDetails: req.body.propertyType === 'pg' ? parsedPgDetails : undefined,
+      tenantNotes: req.body.tenantNotes || '',
       images: imageUrls,
       ownerId: req.user._id,
     });
@@ -122,6 +124,11 @@ exports.updateAvailability = async (req, res) => {
              return res.status(400).json({ success: false, message: "moveInReady boolean payload is missing for apartment update." });
           }
           property.moveInReady = req.body.moveInReady;
+      }
+      
+      // Handle unconditional Notes Updates if provided
+      if (req.body.tenantNotes !== undefined) {
+         property.tenantNotes = req.body.tenantNotes;
       }
 
       await property.save();

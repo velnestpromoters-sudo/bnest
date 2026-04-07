@@ -73,9 +73,21 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
       <div className="relative h-64 w-full bg-slate-200">
         <img src={property.images[0]} alt="Prop" className="w-full h-full object-cover" />
-        <button onClick={() => router.back()} className="absolute top-4 left-4 p-2 bg-black/40 rounded-full text-white backdrop-blur-md">
+        <button onClick={() => router.back()} className="absolute top-4 left-4 p-2 bg-black/40 rounded-full text-white backdrop-blur-md z-10 transition-colors hover:bg-black/60">
           <ArrowLeft className="w-5 h-5" />
         </button>
+
+        {/* Tenant Notes Glassmorphic Overlay */}
+        {property.tenantNotes && (
+           <div className="absolute top-4 left-16 right-4 z-10 animate-in fade-in slide-in-from-top-2 duration-500">
+              <div className="bg-black/60 backdrop-blur-md border border-white/20 rounded-2xl p-3 shadow-2xl">
+                 <p className="text-white text-[13px] font-bold leading-snug drop-shadow-md">
+                    <span className="text-[#ec38b7] font-black mr-1.5 uppercase tracking-wider text-[10px]">Owner Note:</span>
+                    {property.tenantNotes}
+                 </p>
+              </div>
+           </div>
+        )}
       </div>
 
       <div className="p-5 flex-1 mt-2">
