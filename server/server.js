@@ -11,7 +11,6 @@ connectDB();
 
 // 3-Minute Render Free Tier Anti-Sleep Keep-Alive Ping (Dual Mode)
 const https = require('https');
-const http = require('http');
 setInterval(() => {
   // 1. Keep Backend awake
   https.get('https://bnest-backend-oz7c.onrender.com').on('error', (err) => {
