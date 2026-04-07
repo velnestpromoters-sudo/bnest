@@ -54,31 +54,31 @@ export default function AuthStepRole() {
         <button 
           onClick={() => submitAuth('tenant')}
           disabled={loading}
-          className={`flex flex-col items-center justify-center gap-4 p-6 rounded-3xl border-2 transition-all active:scale-95 ${role === 'tenant' ? 'bg-[#FF6A3D]/20 border-[#FF6A3D]' : 'bg-black/40 border-white/10 hover:border-white/30'} ${loading && role !== 'tenant' ? 'opacity-50' : 'opacity-100'}`}
+          className={`flex flex-col items-center justify-center gap-4 p-6 rounded-3xl border-2 transition-all active:scale-95 ${role === 'tenant' ? 'bg-[#ec38b7]/20 border-[#ec38b7]' : 'bg-black/40 border-white/10 hover:border-white/30'} ${loading && role !== 'tenant' ? 'opacity-50' : 'opacity-100'}`}
         >
-          <div className={`p-4 rounded-full ${role === 'tenant' ? 'bg-[#FF6A3D]' : 'bg-white/10'}`}>
+          <div className={`p-4 rounded-full ${role === 'tenant' ? 'bg-[#ec38b7]' : 'bg-white/10'}`}>
             <Home className={`w-8 h-8 ${role === 'tenant' ? 'text-white' : 'text-white/70'}`} />
           </div>
           <div>
             <span className="font-black text-white block text-lg">Tenant</span>
             <span className="text-xs text-white/50 font-medium">Hunt property</span>
           </div>
-          {loading && role === 'tenant' && <Loader2 className="w-5 h-5 text-[#FF6A3D] animate-spin mt-2 block mx-auto" />}
+          {loading && role === 'tenant' && <Loader2 className="w-5 h-5 text-[#ec38b7] animate-spin mt-2 block mx-auto" />}
         </button>
 
         <button 
           onClick={() => submitAuth('owner')}
           disabled={loading}
-          className={`flex flex-col items-center justify-center gap-4 p-6 rounded-3xl border-2 transition-all active:scale-95 ${role === 'owner' ? 'bg-[#FF6A3D]/20 border-[#FF6A3D]' : 'bg-black/40 border-white/10 hover:border-white/30'} ${loading && role !== 'owner' ? 'opacity-50' : 'opacity-100'}`}
+          className={`flex flex-col items-center justify-center gap-4 p-6 rounded-3xl border-2 transition-all active:scale-95 ${role === 'owner' ? 'bg-[#ec38b7]/20 border-[#ec38b7]' : 'bg-black/40 border-white/10 hover:border-white/30'} ${loading && role !== 'owner' ? 'opacity-50' : 'opacity-100'}`}
         >
-          <div className={`p-4 rounded-full ${role === 'owner' ? 'bg-[#FF6A3D]' : 'bg-white/10'}`}>
+          <div className={`p-4 rounded-full ${role === 'owner' ? 'bg-[#ec38b7]' : 'bg-white/10'}`}>
             <Building2 className={`w-8 h-8 ${role === 'owner' ? 'text-white' : 'text-white/70'}`} />
           </div>
           <div>
             <span className="font-black text-white block text-lg">Owner</span>
             <span className="text-xs text-white/50 font-medium">List property</span>
           </div>
-          {loading && role === 'owner' && <Loader2 className="w-5 h-5 text-[#FF6A3D] animate-spin mt-2 block mx-auto" />}
+          {loading && role === 'owner' && <Loader2 className="w-5 h-5 text-[#ec38b7] animate-spin mt-2 block mx-auto" />}
         </button>
       </div>
     </div>

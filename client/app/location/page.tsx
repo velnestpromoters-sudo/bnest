@@ -162,11 +162,11 @@ export default function LocationTracker() {
             </button>
             
             {/* Awesome Floating Map Search Engine with Auto-complete */}
-            <form onSubmit={handleManualSearchSubmit} className="flex-1 relative group pointer-events-auto flex items-center bg-white/95 backdrop-blur-3xl shadow-xl rounded-full border-2 border-transparent focus-within:border-[#FF6A3D]/50 transition-colors">
+            <form onSubmit={handleManualSearchSubmit} className="flex-1 relative group pointer-events-auto flex items-center bg-white/95 backdrop-blur-3xl shadow-xl rounded-full border-2 border-transparent focus-within:border-[#ec38b7]/50 transition-colors">
                 
                 <div className="pl-4 pr-2 py-3.5 flex items-center pointer-events-none">
                     {isSearching ? (
-                        <div className="w-4 h-4 border-2 border-slate-400 border-t-[#FF6A3D] rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-slate-400 border-t-[#ec38b7] rounded-full animate-spin"></div>
                     ) : (
                         <Search className="w-4 h-4 text-slate-400" />
                     )}
@@ -183,7 +183,7 @@ export default function LocationTracker() {
                 <button 
                   type="submit" 
                   disabled={isSearching}
-                  className="px-5 py-2 mr-1.5 bg-[#FF6A3D] hover:bg-[#ff5522] text-white text-xs font-black uppercase tracking-wider rounded-full shadow-md active:scale-95 transition-all"
+                  className="px-5 py-2 mr-1.5 bg-[#ec38b7] hover:bg-[#ff5522] text-white text-xs font-black uppercase tracking-wider rounded-full shadow-md active:scale-95 transition-all"
                 >
                   Search
                 </button>
@@ -202,7 +202,7 @@ export default function LocationTracker() {
                                     className="w-full text-left px-5 py-3.5 hover:bg-slate-50 transition-colors flex items-center gap-4 active:scale-95"
                                 >
                                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                        <MapPin className="w-4 h-4 text-[#FF6A3D]" />
+                                        <MapPin className="w-4 h-4 text-[#ec38b7]" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-slate-900 font-extrabold text-sm line-clamp-1">{name}</span>
@@ -229,7 +229,7 @@ export default function LocationTracker() {
             <button 
                 onClick={handleConfirmLocation}
                 disabled={isConfirming}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-[#FF6A3D] text-white rounded-2xl font-black text-sm uppercase tracking-wide active:scale-[0.98] transition-all shadow-xl shadow-[#FF6A3D]/30"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-[#ec38b7] text-white rounded-2xl font-black text-sm uppercase tracking-wide active:scale-[0.98] transition-all shadow-xl shadow-[#ec38b7]/30"
             >
                 {isConfirming ? 'Pinpointing...' : 'Confirm Location Pin'}
             </button>
@@ -239,12 +239,12 @@ export default function LocationTracker() {
          <button 
              onClick={triggerGPSLocate}
              disabled={isLocating}
-             className="w-16 h-16 shrink-0 bg-white text-[#FF6A3D] rounded-full shadow-2xl flex items-center justify-center border-2 border-white/50 active:scale-90 transition-transform hover:shadow-[#FF6A3D]/40 hover:shadow-lg pointer-events-auto"
+             className="w-16 h-16 shrink-0 bg-white text-[#ec38b7] rounded-full shadow-2xl flex items-center justify-center border-2 border-white/50 active:scale-90 transition-transform hover:shadow-[#ec38b7]/40 hover:shadow-lg pointer-events-auto"
          >
              {isLocating ? (
-                 <div className="w-6 h-6 border-2 border-[#FF6A3D] border-t-transparent rounded-full animate-spin"></div>
+                 <div className="w-6 h-6 border-2 border-[#ec38b7] border-t-transparent rounded-full animate-spin"></div>
              ) : (
-                 <Navigation className="w-7 h-7 fill-[#FF6A3D]/20" />
+                 <Navigation className="w-7 h-7 fill-[#ec38b7]/20" />
              )}
          </button>
       </div>

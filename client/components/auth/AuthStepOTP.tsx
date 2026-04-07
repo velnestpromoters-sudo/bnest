@@ -36,7 +36,7 @@ export default function AuthStepOTP() {
       </button>
 
       <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20 mx-auto">
-         <KeyRound className="w-8 h-8 text-[#FF6A3D]" />
+         <KeyRound className="w-8 h-8 text-[#ec38b7]" />
       </div>
       
       <h2 className="text-2xl font-black text-white mb-2 tracking-tight text-center">Verify Access Code</h2>
@@ -55,7 +55,7 @@ export default function AuthStepOTP() {
             setError('');
           }}
           placeholder="000000"
-          className="w-full bg-black/40 border border-white/20 text-white font-black text-4xl tracking-[1em] text-center pl-[1em] py-5 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors"
+          className="w-full bg-black/40 border border-white/20 text-white font-black text-4xl tracking-[1em] text-center pl-[1em] py-5 rounded-xl focus:outline-none focus:border-[#ec38b7] transition-colors"
           autoFocus
         />
         {error && <p className="text-red-400 text-xs font-bold mt-2 text-center animate-in fade-in">{error}</p>}
@@ -64,7 +64,7 @@ export default function AuthStepOTP() {
       <button 
         onClick={handleVerify}
         disabled={otp.length !== 6 || verifying}
-        className="w-full bg-[#FF6A3D] hover:bg-[#ff5522] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,106,61,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 mt-4"
+        className="w-full bg-[#ec38b7] hover:bg-[#ff5522] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,106,61,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 mt-4"
       >
         {verifying ? '...' : <>Confirm Code <CheckCircle2 className="w-5 h-5" /></>}
       </button>

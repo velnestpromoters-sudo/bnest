@@ -63,7 +63,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
   if (loading) return (
     <div className="h-screen bg-slate-50 flex flex-col items-center justify-center">
-       <div className="w-12 h-12 border-4 border-[#FF6A3D] border-t-transparent rounded-full animate-spin mb-4" />
+       <div className="w-12 h-12 border-4 border-[#ec38b7] border-t-transparent rounded-full animate-spin mb-4" />
        <p className="text-slate-400 font-medium animate-pulse">Loading property details...</p>
     </div>
   );
@@ -96,7 +96,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between mb-6">
           <div>
             <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Rent</p>
-            <p className="text-2xl font-black text-[#FF6A3D]">₹{property.rent?.toLocaleString()}</p>
+            <p className="text-2xl font-black text-[#ec38b7]">₹{property.rent?.toLocaleString()}</p>
           </div>
           <div className="h-10 w-[1px] bg-slate-200"></div>
           <div>
@@ -106,9 +106,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         </div>
 
         {!isAuthenticated ? (
-          <div className="mt-8 bg-orange-50/50 border border-orange-100 rounded-3xl p-6 text-center shadow-inner">
+          <div className="mt-8 bg-purple-50/50 border border-purple-100 rounded-3xl p-6 text-center shadow-inner">
              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-50">
-                <ShieldCheck className="w-8 h-8 text-[#FF6A3D]" />
+                <ShieldCheck className="w-8 h-8 text-[#ec38b7]" />
              </div>
              <h3 className="text-lg font-bold text-slate-900 mb-2">Login to View Full Details</h3>
              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
@@ -116,7 +116,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
              </p>
              <button 
                onClick={openModal} 
-               className="w-full py-4 bg-[#FF6A3D] text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+               className="w-full py-4 bg-[#ec38b7] text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
              >
                Login to View Details
              </button>
@@ -143,7 +143,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                </div>
                {property.location?.googleMapLink && (
                  <div className="col-span-2 mt-1">
-                    <a href={property.location.googleMapLink} target="_blank" rel="noreferrer" className="text-[#FF6A3D] text-sm font-bold flex items-center gap-1 hover:underline">
+                    <a href={property.location.googleMapLink} target="_blank" rel="noreferrer" className="text-[#ec38b7] text-sm font-bold flex items-center gap-1 hover:underline">
                        <MapPin className="w-4 h-4" /> Open in Google Maps
                     </a>
                  </div>
@@ -154,15 +154,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
              <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Owner Credentials</p>
                 <p className="font-black text-slate-800 text-xl mb-1">{property.ownerId?.name || 'Verified Owner'}</p>
-                <p className="font-semibold text-[#FF6A3D] text-lg tracking-wide mb-5">
+                <p className="font-semibold text-[#ec38b7] text-lg tracking-wide mb-5">
                    {property.ownerId?.mobile || '+91 98XXX XXXXX'}
                 </p>
                 
                 <div className="flex gap-3">
-                  <button onClick={() => window.open(`tel:${property.ownerId?.mobile}`, '_self')} className="flex-1 py-3 border-2 border-[#FF6A3D] bg-orange-50 text-[#FF6A3D] font-black rounded-xl text-sm shadow-sm active:scale-95 transition-all">
+                  <button onClick={() => window.open(`tel:${property.ownerId?.mobile}`, '_self')} className="flex-1 py-3 border-2 border-[#ec38b7] bg-purple-50 text-[#ec38b7] font-black rounded-xl text-sm shadow-sm active:scale-95 transition-all">
                     Call Now
                   </button>
-                  <button className="flex-1 py-3 bg-[#FF6A3D] text-white font-black rounded-xl text-sm shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+                  <button className="flex-1 py-3 bg-[#ec38b7] text-white font-black rounded-xl text-sm shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
                     Request Visit
                   </button>
                 </div>

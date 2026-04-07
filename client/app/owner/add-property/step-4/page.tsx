@@ -48,13 +48,13 @@ export default function Step4() {
        <form onSubmit={handleNext} className="flex flex-col gap-5">
           
           <div 
-             className="w-full h-44 border-2 border-dashed border-[#FF5A1F] bg-orange-50 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-orange-100"
+             className="w-full h-44 border-2 border-dashed border-[#801786] bg-purple-50 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-purple-100"
              onClick={() => fileInputRef.current?.click()}
           >
-             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 text-[#FF5A1F]">
+             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 text-[#801786]">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
              </div>
-             <p className="text-sm font-bold text-[#FF5A1F]">Tap to Select Media</p>
+             <p className="text-sm font-bold text-[#801786]">Tap to Select Media</p>
              <p className="text-xs text-gray-500 mt-1">JPEG/PNG — Max 5 files</p>
              
              <input 
@@ -91,7 +91,7 @@ export default function Step4() {
           )}
 
           <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-10 md:static md:bg-transparent md:border-0 md:p-0 mt-auto pt-6">
-             <button type="submit" className="w-full bg-[#FF5A1F] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#E04812] transition-colors">
+             <button type="submit" className="w-full bg-[#801786] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#a61c92] transition-colors">
                 Final Step →
              </button>
           </div>

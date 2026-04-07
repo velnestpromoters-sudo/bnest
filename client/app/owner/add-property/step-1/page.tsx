@@ -27,7 +27,7 @@ export default function Step1() {
                 value={title}
                 onChange={(e) => updateField('title', e.target.value)}
                 placeholder="e.g. Modern 2BHK in Downtown"
-                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
              />
           </div>
 
@@ -42,7 +42,7 @@ export default function Step1() {
                         value={rent}
                         onChange={(e) => updateField('rent', e.target.value)}
                         placeholder="15000"
-                        className="w-full border-2 border-gray-200 p-4 pl-8 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                        className="w-full border-2 border-gray-200 p-4 pl-8 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
                     />
                  </div>
               </div>
@@ -56,7 +56,7 @@ export default function Step1() {
                         value={deposit}
                         onChange={(e) => updateField('deposit', e.target.value)}
                         placeholder="50000"
-                        className="w-full border-2 border-gray-200 p-4 pl-8 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                        className="w-full border-2 border-gray-200 p-4 pl-8 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
                     />
                  </div>
               </div>
@@ -68,7 +68,7 @@ export default function Step1() {
                 required
                 value={bhkType}
                 onChange={(e) => updateField('bhkType', e.target.value)}
-                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none bg-white appearance-none"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none bg-white appearance-none"
              >
                 <option value="" disabled>Select Layout</option>
                 <option value="1RK">1 RK</option>
@@ -80,7 +80,7 @@ export default function Step1() {
           </div>
 
           <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-10 md:static md:bg-transparent md:border-0 md:p-0 md:mt-4">
-             <button type="submit" className="w-full bg-[#FF5A1F] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#E04812] transition-colors">
+             <button type="submit" className="w-full bg-[#801786] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#a61c92] transition-colors">
                 Next Step →
              </button>
           </div>

@@ -31,7 +31,7 @@ export default function Step3() {
                    checked={preferences.bachelorAllowed}
                    onChange={(e) => updatePreference('bachelorAllowed', e.target.checked)}
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF5A1F]"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#801786]"></div>
              </label>
           </div>
 
@@ -47,7 +47,7 @@ export default function Step3() {
                    checked={moveInReady}
                    onChange={(e) => updateField('moveInReady', e.target.checked)}
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF5A1F]"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#801786]"></div>
              </label>
           </div>
 
@@ -56,7 +56,7 @@ export default function Step3() {
              <select 
                 value={preferences.maxOccupants}
                 onChange={(e) => updatePreference('maxOccupants', e.target.value)}
-                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none bg-white appearance-none"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none bg-white appearance-none"
              >
                 <option value="1">1 Person</option>
                 <option value="2">2 People</option>
@@ -67,7 +67,7 @@ export default function Step3() {
           </div>
 
           <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-10 md:static md:bg-transparent md:border-0 md:p-0 md:mt-4">
-             <button type="submit" className="w-full bg-[#FF5A1F] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#E04812] transition-colors">
+             <button type="submit" className="w-full bg-[#801786] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#a61c92] transition-colors">
                 Next Step →
              </button>
           </div>

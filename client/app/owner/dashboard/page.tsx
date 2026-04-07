@@ -61,13 +61,13 @@ export default function OwnerDashboard() {
         <div className="flex gap-4 mt-4 md:mt-0 items-center">
            <button 
               onClick={() => router.push('/home')}
-              className="text-[#FF5A1F] font-bold text-base hover:bg-orange-50 px-4 py-2.5 rounded-full transition-colors cursor-pointer"
+              className="text-[#801786] font-bold text-base hover:bg-purple-50 px-4 py-2.5 rounded-full transition-colors cursor-pointer"
            >
              Home
            </button>
            <button 
               onClick={() => router.push('/owner/add-property/step-1')}
-              className="flex-1 md:flex-none bg-[#FF5A1F] text-white px-5 py-2.5 rounded-full font-bold shadow hover:bg-[#E04812] transition-colors"
+              className="flex-1 md:flex-none bg-[#801786] text-white px-5 py-2.5 rounded-full font-bold shadow hover:bg-[#a61c92] transition-colors"
            >
              + Add Property
            </button>
@@ -88,8 +88,8 @@ export default function OwnerDashboard() {
                <p className="text-gray-500 font-medium">Total Active Listings</p>
                <h2 className="text-4xl font-black text-gray-900 mt-1">{properties.length}</h2>
             </div>
-            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-               <svg className="w-8 h-8 text-[#FF5A1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+               <svg className="w-8 h-8 text-[#801786]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             </div>
         </div>
 
@@ -100,7 +100,7 @@ export default function OwnerDashboard() {
              <p className="text-gray-500 mb-4">You haven't listed any properties yet.</p>
              <button 
                 onClick={() => router.push('/owner/add-property/step-1')}
-                className="text-[#FF5A1F] font-bold hover:underline"
+                className="text-[#801786] font-bold hover:underline"
              >
                Create your first listing →
              </button>
@@ -119,7 +119,7 @@ export default function OwnerDashboard() {
                    <div className="flex-1">
                       <h4 className="font-bold text-gray-900 line-clamp-1">{prop.title}</h4>
                       <p className="text-sm text-gray-500 mt-1">{prop.location?.area || 'Area not specified'}</p>
-                      <p className="text-[#FF5A1F] font-bold mt-2">₹{prop.rent}/mo</p>
+                      <p className="text-[#801786] font-bold mt-2">₹{prop.rent}/mo</p>
                    </div>
                    <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
                       Active

@@ -72,8 +72,8 @@ export default function InteractiveMap({
 
       {/* FIXED CENTER NEEDLE (Uber Style) */}
       <div className="absolute top-1/2 left-1/2 -mt-10 -ml-5 z-10 pointer-events-none drop-shadow-xl flex flex-col items-center animate-bounce">
-         <div className="bg-[#FF6A3D] text-white p-2.5 rounded-full shadow-lg border-2 border-white">
-            <MapPin className="w-6 h-6 fill-white stroke-[#FF6A3D]" />
+         <div className="bg-[#ec38b7] text-white p-2.5 rounded-full shadow-lg border-2 border-white">
+            <MapPin className="w-6 h-6 fill-white stroke-[#ec38b7]" />
          </div>
          {/* The literal Needle Tip */}
          <div className="w-1 h-3 bg-black/80 rounded-b-full"></div>

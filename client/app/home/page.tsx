@@ -144,7 +144,7 @@ export default function HomeReelPage() {
       >
         {isLoadingFeed ? (
           <div className="w-full h-full flex flex-col items-center justify-center">
-            <div className="w-10 h-10 border-4 border-[#FF6A3D] border-t-transparent rounded-full animate-spin mb-4" />
+            <div className="w-10 h-10 border-4 border-[#ec38b7] border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-white/60 font-medium animate-pulse">Loading amazing homes...</p>
           </div>
         ) : properties.length === 0 ? (

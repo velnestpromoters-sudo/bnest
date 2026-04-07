@@ -19,7 +19,7 @@ export default function AuthStepDetails() {
       </button>
 
       <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20 mx-auto">
-         <UserCircle2 className="w-8 h-8 text-[#FF6A3D]" />
+         <UserCircle2 className="w-8 h-8 text-[#ec38b7]" />
       </div>
       
       <h2 className="text-2xl font-black text-white mb-2 tracking-tight text-center">Your Details</h2>
@@ -38,7 +38,7 @@ export default function AuthStepDetails() {
               value={name}
               onChange={(e) => setField('name', e.target.value)}
               placeholder="e.g. John Doe"
-              className="w-full bg-black/40 border border-white/20 text-white font-bold text-base px-5 py-3 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors"
+              className="w-full bg-black/40 border border-white/20 text-white font-bold text-base px-5 py-3 rounded-xl focus:outline-none focus:border-[#ec38b7] transition-colors"
             />
           </div>
 
@@ -54,7 +54,7 @@ export default function AuthStepDetails() {
                   value={mobile}
                   onChange={handleMobileChange}
                   placeholder="000 000 0000"
-                  className="w-full bg-black/40 border border-white/20 text-white font-bold text-base pl-16 pr-5 py-3 rounded-xl focus:outline-none focus:border-[#FF6A3D] transition-colors"
+                  className="w-full bg-black/40 border border-white/20 text-white font-bold text-base pl-16 pr-5 py-3 rounded-xl focus:outline-none focus:border-[#ec38b7] transition-colors"
                 />
             </div>
           </div>
@@ -69,7 +69,7 @@ export default function AuthStepDetails() {
                     onClick={() => setField('gender', g)}
                     className={`flex-1 py-2 rounded-lg text-xs font-bold capitalize transition-all duration-300 ${
                         gender === g 
-                        ? 'bg-[#FF6A3D] text-white shadow-lg' 
+                        ? 'bg-[#ec38b7] text-white shadow-lg' 
                         : 'text-white/50 hover:bg-white/5 hover:text-white'
                     }`}
                   >
@@ -84,7 +84,7 @@ export default function AuthStepDetails() {
       <button 
         onClick={() => isFormValid && nextStep()}
         disabled={!isFormValid}
-        className="w-full bg-[#FF6A3D] hover:bg-[#ff5522] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,106,61,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
+        className="w-full bg-[#ec38b7] hover:bg-[#ff5522] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,106,61,0.3)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

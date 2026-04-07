@@ -34,11 +34,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="mt-5">
            <div className="flex justify-between text-xs font-bold text-gray-400 mb-2 px-1">
               <span>Step {currentStep} of 5</span>
-              <span className="text-[#FF5A1F]">{Math.round(progressPercent)}%</span>
+              <span className="text-[#801786]">{Math.round(progressPercent)}%</span>
            </div>
            <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
                <div 
-                  className="bg-[#FF5A1F] h-full transition-all duration-300 ease-out"
+                  className="bg-[#801786] h-full transition-all duration-300 ease-out"
                   style={{ width: `${progressPercent}%` }}
                />
            </div>

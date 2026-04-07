@@ -76,12 +76,12 @@ export default function Step5() {
            </div>
            <div className="flex justify-between">
               <span className="text-gray-500">Media</span>
-              <span className="font-bold text-[#FF5A1F]">{formState.images.length} files attached</span>
+              <span className="font-bold text-[#801786]">{formState.images.length} files attached</span>
            </div>
        </div>
 
        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="bg-orange-50 p-5 rounded-xl border border-orange-200">
+          <div className="bg-purple-50 p-5 rounded-xl border border-purple-200">
              <h3 className="font-bold text-gray-900 mb-2">Terms & Conditions</h3>
              <ul className="text-xs text-gray-600 list-disc pl-4 space-y-2 mb-4">
                  <li>Owner must provide legally real properties only. Zero fake listings allowed.</li>
@@ -95,7 +95,7 @@ export default function Step5() {
                    required
                    checked={agreed}
                    onChange={(e) => setAgreed(e.target.checked)}
-                   className="mt-1 w-4 h-4 text-[#FF5A1F] bg-white border-gray-300 rounded focus:ring-[#FF5A1F]"
+                   className="mt-1 w-4 h-4 text-[#801786] bg-white border-gray-300 rounded focus:ring-[#801786]"
                 />
                 <span className="text-sm font-bold text-gray-800">I agree to the Provider Terms & Conditions</span>
              </label>
@@ -105,7 +105,7 @@ export default function Step5() {
              <button 
                 type="submit" 
                 disabled={!agreed || isSubmitting}
-                className="w-full bg-[#FF5A1F] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#E04812] transition-colors disabled:opacity-50 flex justify-center items-center"
+                className="w-full bg-[#801786] text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#a61c92] transition-colors disabled:opacity-50 flex justify-center items-center"
              >
                 {isSubmitting ? (
                    <span className="flex items-center gap-2">

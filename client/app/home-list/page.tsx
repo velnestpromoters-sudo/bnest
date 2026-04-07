@@ -43,7 +43,7 @@ export default function HomeListPage() {
                onClick={handleProfileClick}
                className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl px-4 py-2.5 rounded-full text-white/90 font-bold text-sm hover:bg-white/20 active:scale-95 transition-all flex items-center gap-2"
              >
-               <div className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-pulse"></div>
+               <div className="w-2 h-2 rounded-full bg-[#ec38b7] animate-pulse"></div>
                {isAuthenticated ? (user?.name || (user?.email ? user.email.split('@')[0] : 'Unknown')) : 'Sign In'}
              </button>
          </div>
@@ -71,8 +71,8 @@ export default function HomeListPage() {
       )}
 
       <div className="flex-1 flex flex-col items-center justify-center text-center mt-10 px-5">
-        <div className="w-24 h-24 bg-orange-100/50 rounded-full flex items-center justify-center mb-6 shadow-inner pointer-events-none">
-           <Construction className="w-12 h-12 text-[#FF6A3D]" />
+        <div className="w-24 h-24 bg-purple-100/50 rounded-full flex items-center justify-center mb-6 shadow-inner pointer-events-none">
+           <Construction className="w-12 h-12 text-[#ec38b7]" />
         </div>
         
         <h1 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">List Mode is Building</h1>

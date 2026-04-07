@@ -43,7 +43,7 @@ export default function Step2() {
                 onChange={(e) => updateLocation('googleMapLink', e.target.value)}
                 placeholder="https://maps.google.com/..."
                 pattern="https?://.*"
-                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
              />
              <p className="text-xs text-gray-400 mt-2">Mandatory for verification routing.</p>
           </div>
@@ -56,7 +56,7 @@ export default function Step2() {
                 value={location.address}
                 onChange={(e) => updateLocation('address', e.target.value)}
                 placeholder="House No., Street Name, Landmark"
-                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors resize-none"
+                className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors resize-none"
              />
           </div>
 
@@ -69,7 +69,7 @@ export default function Step2() {
                     value={location.area}
                     onChange={(e) => updateLocation('area', e.target.value)}
                     placeholder="e.g. Adyar"
-                    className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                    className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
                  />
               </div>
               <div>
@@ -80,14 +80,14 @@ export default function Step2() {
                     value={location.city}
                     onChange={(e) => updateLocation('city', e.target.value)}
                     placeholder="Chennai"
-                    className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#FF5A1F] focus:ring-0 outline-none transition-colors"
+                    className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-[#801786] focus:ring-0 outline-none transition-colors"
                  />
               </div>
           </div>
 
           <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t z-50 flex gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:static md:shadow-none md:border-0 md:bg-transparent">
              {/* Left Bottom: Next/Confirm */}
-             <button type="submit" className="flex-[0.5] flex items-center justify-center gap-2 bg-[#FF5A1F] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#E04812] transition-colors">
+             <button type="submit" className="flex-[0.5] flex items-center justify-center gap-2 bg-[#801786] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#a61c92] transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                 Confirm
              </button>

@@ -152,7 +152,7 @@ export default function VideoCard({ id, video, images, rent, area, district, mat
         
         {/* Location */}
         <div className="flex items-center gap-1.5 text-white/90 mb-3 font-medium">
-          <MapPin className="w-4 h-4 text-[#FF6A3D]" />
+          <MapPin className="w-4 h-4 text-[#ec38b7]" />
           <span>{area}, {district}</span>
         </div>
 
