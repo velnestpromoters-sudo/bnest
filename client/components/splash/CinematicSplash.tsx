@@ -1,169 +1,84 @@
 "use client";
 
-import React, { useEffect, useMemo } from 'react';
-import { motion, useAnimationControls, Variants } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
 export default function CinematicSplash({ onComplete }: { onComplete: () => void }) {
-  const controlsSpheres = useAnimationControls();
-  const controlsBg = useAnimationControls();
-  const controlsB = useAnimationControls();
-  const controlsRoof = useAnimationControls();
-  const controlsNest = useAnimationControls();
+  const [currentFrame, setCurrentFrame] = useState(1);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const totalFrames = 18;
 
-  // Memoize extremely dense grid of sphere coordinates to absolutely flood the mobile screen
-  const spheres = useMemo(() => Array.from({ length: 50 }).map((_, i) => ({
-    id: i,
-    x: (Math.random() - 0.5) * 1400, // massively wide horizontal overlap
-    y: (Math.random() - 0.5) * 2400, // massively tall vertical overlap
-    size: Math.random() * 350 + 200, // colossally increased disc sizes (200px - 550px)
-    blur: Math.random() * 20 + 10,
-    color: ['#FF5A1F', '#FF7A3C', '#FFB199'][i % 3]
-  })), []);
-
-  const sphereVariants: Variants = {
-      initial: (i: number) => ({ 
-          opacity: 1, 
-          scale: 0.8, 
-          x: spheres[i].x, 
-          y: spheres[i].y,
-          // Box shadow added for the physical 3D stacking effect shown in Figma
-          boxShadow: '0px 10px 30px rgba(0,0,0,0.5)'
-      }),
-      parallax: { 
-          scale: [0.8, 1.2], 
-          y: [0, -50], 
-          opacity: 1, 
-          transition: { duration: 1.2, ease: "easeInOut" } 
-      },
-      scatter: (i: number) => ({ 
-          scale: 2, 
-          x: spheres[i].x * 2.5, 
-          y: spheres[i].y * 2.5, 
-          opacity: 0, // Fade out completely when scattering
-          transition: { duration: 1.0, ease: "easeOut" } 
-      }),
-      hide: { 
-          opacity: 0, 
-          scale: 3, 
-          transition: { duration: 0.8, ease: "easeIn" } 
-      }
-  };
-
+  // 1. Invisible Preloader to guarantee smooth playback
   useEffect(() => {
-    // Master Animation Choreographer (5000ms Timeline)
-    const runSequence = async () => {
-      
-      // 0ms - 1200ms: Spheres Parallax In
-      controlsSpheres.start("parallax");
+    let loadedCount = 0;
+    const padding = (num: number) => num.toString().padStart(3, '0');
+    
+    for (let i = 1; i <= totalFrames; i++) {
+        const img = new Image();
+        img.src = `/splash-frames/ezgif-frame-${padding(i)}.jpg`;
+        img.onload = () => {
+            loadedCount++;
+            if (loadedCount === totalFrames) {
+                setImagesLoaded(true);
+            }
+        };
+        // Error handling in case one drops
+        img.onerror = () => {
+            loadedCount++;
+            if (loadedCount === totalFrames) {
+                setImagesLoaded(true);
+            }
+        };
+    }
+  }, []);
 
-      // Wait exactly 1200ms
-      await new Promise(r => setTimeout(r, 1200));
+  // 2. Playback Sequence
+  useEffect(() => {
+    if (!imagesLoaded) return;
 
-      // 1200ms: Scatter Spheres & Fade BG
-      controlsSpheres.start("scatter");
-      controlsBg.start({
-        backgroundColor: "#F5F5F5",
-        transition: { duration: 1.0, ease: "easeInOut" }
-      });
+    const interval = setInterval(() => {
+        setCurrentFrame((prev) => {
+            if (prev >= totalFrames) {
+                clearInterval(interval);
+                return totalFrames;
+            }
+            return prev + 1;
+        });
+    }, 125); // 8 FPS = ~125ms per frame
 
-      // Wait until 2200ms timeline mark
-      await new Promise(r => setTimeout(r, 1000));
+    return () => clearInterval(interval);
+  }, [imagesLoaded]);
 
-      // 2200ms - 3000ms: "B" letter handwriting draw effect
-      controlsB.start({
-        pathLength: [0, 1],
-        opacity: [0, 1],
-        transition: { duration: 0.8, ease: "easeOut" }
-      });
+  // 3. Routing Hook (Fires precisely when frame 18 hits)
+  useEffect(() => {
+    if (imagesLoaded && currentFrame === totalFrames) {
+      // Add a tiny 200ms buffer after the last frame so users can see it
+      const timer = setTimeout(() => {
+         onComplete();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [currentFrame, imagesLoaded, onComplete]);
 
-      // Wait til 2600ms
-      await new Promise(r => setTimeout(r, 400));
-
-      // 2600ms - 3200ms: Roof Drops from top
-      controlsRoof.start({
-        y: [-150, 0],
-        opacity: [0, 1],
-        transition: { duration: 0.6, type: "spring", bounce: 0.4 }
-      });
-
-      // Wait til 3000ms
-      await new Promise(r => setTimeout(r, 400));
-
-      // 3000ms - 3600ms: Nest fades in
-      controlsNest.start({
-        opacity: [0, 1],
-        scale: [0.85, 1],
-        transition: { duration: 0.6, ease: "easeOut" }
-      });
-
-      // Wait til 3200ms
-      await new Promise(r => setTimeout(r, 200));
-
-      // 3200ms: Pure White final cleanup
-      controlsSpheres.start("hide");
-      controlsBg.start({
-        backgroundColor: "#FFFFFF",
-        transition: { duration: 0.8, ease: "easeInOut" }
-      });
-
-      // 4000ms - 5000ms: Hold final static frame
-      await new Promise(r => setTimeout(r, 1800));
-
-      // Execute redirect callback at exactly 5000ms
-      onComplete();
-    };
-
-    runSequence();
-  }, [controlsSpheres, controlsBg, controlsB, controlsRoof, controlsNest, onComplete]);
+  const padNum = (num: number) => num.toString().padStart(3, '0');
 
   return (
-    <motion.div 
-      animate={controlsBg}
-      initial={{ backgroundColor: "#000000" }}
-      className="relative w-full h-[100dvh] overflow-hidden flex items-center justify-center font-sans tracking-wide"
-    >
-      {/* 1. Stacked Figma Spheres Layer */}
-      {spheres.map((sphere, index) => (
-        <motion.div
-           key={sphere.id}
-           custom={index}
-           variants={sphereVariants}
-           initial="initial"
-           animate={controlsSpheres}
-           style={{
-             position: 'absolute',
-             width: sphere.size,
-             height: sphere.size,
-             borderRadius: '50%',
-             backgroundColor: sphere.color,
-             // Removed mixBlendMode to allow solid stacking
-           }}
-        />
-      ))}
+    <div className="w-full h-[100dvh] relative bg-black overflow-hidden flex items-center justify-center">
+      {/* Black background is perfect for video frame borders */}
+      
+      {!imagesLoaded && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
+             {/* Barebones spinner while loading the 18 frames into cache */}
+             <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+          </div>
+      )}
 
-      {/* 2. Logo Container */}
-      <div className="relative w-[220px] h-[220px] z-10 flex items-center justify-center drop-shadow-xl">
-        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="140pt" height="140pt" viewBox="0 0 140 140" preserveAspectRatio="xMidYMid meet" className="w-[200px] h-[200px] overflow-visible">
-            <motion.g 
-               transform="translate(0.000000,140.000000) scale(0.100000,-0.100000)" 
-               fill="#FF5A1F" 
-               stroke="#FF5A1F"
-               strokeWidth="15"
-               animate={controlsB}
-               initial={{ pathLength: 0, opacity: 0, fillOpacity: 0 }}
-               onAnimationComplete={(definition) => {
-                  // After it finishes drawing the stroke, pulse the fill opacity!
-                  controlsNest.start({ fillOpacity: 1, transition: { duration: 0.8, ease: "easeOut" } });
-               }}
-            >
-                <motion.path
-                   animate={controlsNest}
-                   initial={{ fillOpacity: 0 }}
-                   d="M344 1168 c-4 -7 -8 -57 -8 -112 l-1 -101 -62 -45 c-72 -52 -88 -84 -54 -111 24 -20 45 -16 78 14 40 36 44 18 41 -201 -3 -206 -3 -207 24 -264 154 -328 635 -278 707 74 62 299 -308 527 -571 353 -62 -41 -68 -36 -68 55 l0 79 73 54 c125 92 179 127 197 127 17 0 225 -144 378 -262 72 -55 72 -55 102 -30 36 29 20 60 -55 112 -75 51 -80 64 -71 160 7 78 -3 93 -56 88 -32 -3 -33 -5 -36 -51 -4 -67 -18 -67 -106 -3 -142 106 -180 105 -328 -10 -91 -70 -98 -70 -98 4 0 32 -5 63 -12 70 -15 15 -65 16 -74 0z m528 -501 c153 -70 148 -188 -9 -247 -270 -101 -587 94 -371 228 93 58 277 67 380 19z m93 -283 c-13 -35 -25 -49 -51 -60 -47 -20 -177 -17 -244 6 l-55 18 84 1 c100 1 181 22 236 60 50 35 52 33 30 -25z m-379 -68 c72 -34 125 -47 204 -49 78 -2 79 -16 2 -38 -138 -39 -283 17 -343 133 -34 66 -23 73 33 24 29 -25 76 -57 104 -70z"
-                />
-            </motion.g>
-        </svg>
-      </div>
-    </motion.div>
+      {imagesLoaded && (
+         <img 
+            src={`/splash-frames/ezgif-frame-${padNum(currentFrame)}.jpg`} 
+            alt="Homyvo Loading Sequence" 
+            className="w-full h-full object-cover"
+         />
+      )}
+    </div>
   );
 }
