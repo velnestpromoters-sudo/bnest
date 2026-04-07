@@ -106,23 +106,23 @@ export default function OwnerDashboard() {
              </button>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'thin' }}>
              {properties.map((prop: any) => (
-                <div key={prop._id} className="bg-white p-4 rounded-xl border flex items-center gap-4">
-                   <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                <div key={prop._id} className="bg-white p-3 rounded-xl border border-gray-200 flex flex-col gap-3 min-w-[220px] max-w-[220px] snap-center shrink-0 shadow-sm relative transition-transform hover:-translate-y-1">
+                   <div className="absolute top-4 right-4 z-10 px-2 py-0.5 bg-green-100/90 backdrop-blur-sm text-green-700 text-[10px] uppercase tracking-wider font-bold rounded-full shadow-sm border border-green-200">
+                      Active
+                   </div>
+                   <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                       {prop.images && prop.images[0] ? (
                          <img src={prop.images[0]} alt="Property" className="w-full h-full object-cover" />
                       ) : (
                          <span className="text-xs text-gray-400 flex items-center justify-center w-full h-full">No Image</span>
                       )}
                    </div>
-                   <div className="flex-1">
-                      <h4 className="font-bold text-gray-900 line-clamp-1">{prop.title}</h4>
-                      <p className="text-sm text-gray-500 mt-1">{prop.location?.area || 'Area not specified'}</p>
-                      <p className="text-[#801786] font-bold mt-2">₹{prop.rent}/mo</p>
-                   </div>
-                   <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                      Active
+                   <div className="flex flex-col px-1">
+                      <h4 className="font-bold text-gray-900 line-clamp-1 text-sm">{prop.title}</h4>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 font-medium">{prop.location?.area || 'Area not specified'}</p>
+                      <p className="text-[#801786] font-black mt-2">₹{prop.rent.toLocaleString()}<span className="text-xs font-semibold text-gray-400">/mo</span></p>
                    </div>
                 </div>
              ))}
