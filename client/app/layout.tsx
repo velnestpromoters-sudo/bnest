@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'homyvo | Verified Homes. Trusted Living.',
   description: 'Clean, mobile-first rental platform',
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg'
+  }
 }
 
 export default function RootLayout({
