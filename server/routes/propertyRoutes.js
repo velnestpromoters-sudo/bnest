@@ -14,4 +14,10 @@ router.post(
   propertyController.createProperty
 );
 
+router.put(
+  '/:id/availability',
+  protect,
+  propertyController.updateAvailability
+);
+
 module.exports = router;

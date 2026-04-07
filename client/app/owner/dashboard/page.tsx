@@ -12,6 +12,8 @@ export default function OwnerDashboard() {
   const [properties, setProperties] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [availabilityModalData, setAvailabilityModalData] = useState<any>(null);
+  const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
 
   useEffect(() => {
     // Basic auth wrap
@@ -137,6 +139,17 @@ export default function OwnerDashboard() {
                    {/* Dark Gradient Overlay for text readability (Reel style) */}
                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent pointer-events-none" />
 
+                   {/* Top Left Menu Trigger */}
+                   <button 
+                      onClick={(e) => {
+                         e.stopPropagation(); // Prevent launching the photo reel
+                         setAvailabilityModalData(prop);
+                      }}
+                      className="absolute top-3 left-3 z-20 p-1.5 bg-black/40 backdrop-blur-md rounded-full shadow-lg border border-white/20 text-white hover:bg-black/60 transition-colors"
+                   >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                   </button>
+
                    {/* Floating Top Right Tag */}
                    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-green-500/30 backdrop-blur-md text-green-300 text-[10px] uppercase tracking-wider font-black rounded-full shadow-lg border border-green-500/40">
                       Active
@@ -158,6 +171,117 @@ export default function OwnerDashboard() {
           </div>
         )}
       </div>
+
+      {/* QUICK AVAILABILITY EDITOR MODAL */}
+      {availabilityModalData && (
+         <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl relative animate-in slide-in-from-bottom-8">
+               <div className="bg-gray-50 border-b p-5 flex justify-between items-center">
+                  <h3 className="font-black text-gray-900 text-lg">Update Availability</h3>
+                  <button onClick={() => setAvailabilityModalData(null)} className="p-1 text-gray-400 hover:text-gray-800 rounded-lg hover:bg-gray-200 transition-colors">
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+               </div>
+               
+               <form 
+                  className="p-5 flex flex-col gap-5"
+                  onSubmit={async (e) => {
+                     e.preventDefault();
+                     try {
+                        setIsUpdatingAvailability(true);
+                        const token = useAuthStore.getState().token;
+                        
+                        let payload = {};
+                        if (availabilityModalData.propertyType === 'pg') {
+                           // Extract dynamic values directly off the form elements
+                           const formEl = e.currentTarget;
+                           const inputs = Array.from(formEl.querySelectorAll('input[type="number"]')) as HTMLInputElement[];
+                           const mappedRooms = inputs.map(input => ({
+                               sharing: Number(input.dataset.sharing),
+                               availableBeds: Number(input.value)
+                           }));
+                           payload = { rooms: mappedRooms };
+                        } else {
+                           // Apartment Boolean
+                           const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
+                           payload = { moveInReady: checkbox.checked };
+                        }
+
+                        const res = await fetch(`/api/properties/${availabilityModalData._id}/availability`, {
+                           method: 'PUT',
+                           headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${token}`
+                           },
+                           body: JSON.stringify(payload)
+                        });
+
+                        const data = await res.json();
+                        if (data.success) {
+                           // Target the specific property locally so we don't have to re-fetch EVERYTHING
+                           setProperties((prevStatus: any) => prevStatus.map((p: any) => p._id === availabilityModalData._id ? data.data : p));
+                           setAvailabilityModalData(null);
+                        } else {
+                           console.error(data.message);
+                           alert("Failed to update availability");
+                        }
+                     } catch(err) {
+                        console.error(err);
+                     } finally {
+                        setIsUpdatingAvailability(false);
+                     }
+                  }}
+               >
+                  <p className="text-sm font-bold text-[#801786]">{availabilityModalData.title}</p>
+                  
+                  {availabilityModalData.propertyType === 'pg' ? (
+                     <div className="flex flex-col gap-3">
+                        {availabilityModalData.pgDetails?.rooms?.map((room: any) => (
+                           <div key={room.sharing} className="flex justify-between items-center p-3 border rounded-xl bg-slate-50">
+                              <div>
+                                 <p className="font-bold text-gray-800 tracking-tight">{room.sharing} Sharing Room</p>
+                                 <p className="text-xs text-gray-500 font-medium">{room.totalBeds} total beds config</p>
+                              </div>
+                              <input 
+                                 type="number" 
+                                 data-sharing={room.sharing}
+                                 defaultValue={room.availableBeds} 
+                                 max={room.totalBeds}
+                                 min={0}
+                                 required
+                                 className="w-16 p-2 text-center border-2 border-gray-200 rounded-lg font-bold text-[#ec38b7] outline-none focus:border-[#ec38b7]"
+                              />
+                           </div>
+                        ))}
+                     </div>
+                  ) : (
+                     <div className="flex justify-between items-center p-4 border rounded-xl bg-slate-50">
+                        <div>
+                           <p className="font-bold text-gray-800">Move-in Ready?</p>
+                           <p className="text-xs text-slate-500">Available to occupy.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                           <input 
+                              type="checkbox" 
+                              defaultChecked={availabilityModalData.moveInReady}
+                              className="sr-only peer" 
+                           />
+                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#801786]"></div>
+                        </label>
+                     </div>
+                  )}
+
+                  <button 
+                     disabled={isUpdatingAvailability}
+                     type="submit" 
+                     className="mt-2 w-full bg-[#801786] hover:bg-[#a420ac] text-white font-black py-3.5 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                     {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
+                  </button>
+               </form>
+            </div>
+         </div>
+      )}
 
       {/* Full-Screen Vertical Swiping Photo Reel Modal */}
       {selectedProperty && (

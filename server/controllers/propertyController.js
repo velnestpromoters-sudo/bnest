@@ -88,3 +88,46 @@ exports.createProperty = async (req, res) => {
     res.status(500).json({ success: false, error: err.message || err.toString() || "Unknown error", details: err });
   }
 };
+
+exports.updateAvailability = async (req, res) => {
+  try {
+      const propertyId = req.params.id;
+      const property = await Property.findById(propertyId);
+
+      if (!property) {
+          return res.status(404).json({ success: false, message: "Property not found" });
+      }
+      
+      if (property.ownerId.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ success: false, message: "Unauthorized to edit this property configuration." });
+      }
+
+      if (property.propertyType === 'pg') {
+          if (!req.body.rooms || !Array.isArray(req.body.rooms)) {
+             return res.status(400).json({ success: false, message: "Valid rooms array mapping required for PG updates." });
+          }
+          
+          const updatedRooms = property.pgDetails.rooms.map(dbRoom => {
+             const payloadRoom = req.body.rooms.find(r => r.sharing === dbRoom.sharing);
+             if (payloadRoom) {
+                 const newAvailable = Math.max(0, Math.min(dbRoom.totalBeds, Number(payloadRoom.availableBeds)));
+                 return { ...dbRoom._doc, availableBeds: newAvailable };
+             }
+             return dbRoom;
+          });
+          
+          property.pgDetails.rooms = updatedRooms;
+      } else {
+          if (req.body.moveInReady === undefined) {
+             return res.status(400).json({ success: false, message: "moveInReady boolean payload is missing for apartment update." });
+          }
+          property.moveInReady = req.body.moveInReady;
+      }
+
+      await property.save();
+      res.status(200).json({ success: true, data: property });
+  } catch(error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: error.message });
+  }
+};
