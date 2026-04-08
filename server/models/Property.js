@@ -16,7 +16,12 @@ const propertySchema = new mongoose.Schema({
   bhkType: String,
   images: [{ type: String }],
   isVerified: { type: Boolean, default: false },
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: false },
+  listingPaymentStatus: {
+    type: String,
+    enum: ["pending", "paid"],
+    default: "pending",
+  },
   matchScore: { type: Number, default: 0 },
   moveInReady: { type: Boolean, default: false },
   tenantNotes: { type: String, default: '' },

@@ -1,4 +1,5 @@
 const Property = require('../models/Property');
+const Access = require('../models/Access');
 
 exports.getAllProperties = async (req, res) => {
   try {
@@ -11,18 +12,42 @@ exports.getAllProperties = async (req, res) => {
 
 exports.getProperty = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id);
+    const property = await Property.findById(req.params.id).populate('ownerId', 'name mobile isVerified');
     if (!property) {
       return res.status(404).json({ success: false, message: 'Property not found' });
     }
 
-    // Role-based payload filtering
     const isAuthenticated = req.user != null;
-    
+
     if (isAuthenticated) {
-      // Full details (requires owner population or deeper fields)
-      const fullProperty = await Property.findById(req.params.id).populate('ownerId', 'name mobile isVerified');
-      return res.status(200).json({ success: true, data: fullProperty, access: 'full' });
+      const isOwner = property.ownerId._id.toString() === req.user._id.toString();
+      
+      let canView = isOwner;
+      if (!isOwner) {
+         const hasPaid = await Access.findOne({
+            user: req.user._id,
+            property: property._id,
+            paymentStatus: "paid"
+         });
+         if (hasPaid) canView = true;
+      }
+
+      // Redact contact data if not paid and not owner
+      const propertyData = property.toObject();
+      if (!canView) {
+         propertyData.ownerId = {
+            name: "Verified Owner",
+            mobile: "+91 xxxxx xxxxx",
+            isVerified: propertyData.ownerId?.isVerified,
+            _id: propertyData.ownerId?._id
+         };
+      }
+
+      return res.status(200).json({ 
+        success: true, 
+        data: propertyData, 
+        access: canView ? 'full' : 'limited' 
+      });
     } else {
       // Limited details for guest
       const limitedProperty = {
@@ -32,7 +57,7 @@ exports.getProperty = async (req, res) => {
         rent: property.rent,
         deposit: property.deposit,
         bhkType: property.bhkType,
-        images: property.images.slice(0, 1), // Only 1 image
+        images: property.images.slice(0, 1),
         isVerified: property.isVerified,
         matchScore: property.matchScore,
         moveInReady: property.moveInReady,

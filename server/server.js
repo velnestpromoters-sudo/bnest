@@ -3,11 +3,14 @@ const http = require('http');
 const app = require('./app');
 const connectDB = require('./config/db');
 const { Server } = require('socket.io');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 connectDB();
+
+app.use('/api/payment', paymentRoutes);
 
 // 3-Minute Render Free Tier Anti-Sleep Keep-Alive Ping (Dual Mode)
 const https = require('https');

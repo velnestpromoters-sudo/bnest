@@ -3,6 +3,7 @@ import { Inter, Geist } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
 import AuthBottomSheet from '@/components/auth/AuthBottomSheet';
+import Script from 'next/script';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const inter = Inter({ subsets: ['latin'] })
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className={inter.className + " min-h-screen bg-slate-50 font-sans antialiased relative overflow-x-hidden"}>
         {children}
         <AuthBottomSheet />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   )

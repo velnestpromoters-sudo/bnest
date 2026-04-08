@@ -49,9 +49,48 @@ export default function Step5() {
        
        const data = await res.json();
        if (data.success) {
-           formState.resetForm();
-           alert("Property published successfully!");
-           router.push('/owner/dashboard');
+           const propertyId = data.data._id;
+           
+           // RAZORPAY ₹500 FLOW
+           const orderRes = await fetch('/api/payment/create-listing', { method: 'POST' });
+           const orderData = await orderRes.json();
+           
+           const options = {
+             key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock_id',
+             amount: orderData.amount,
+             currency: 'INR',
+             name: 'Homyvo Property Listing',
+             description: 'One-time ₹500 publishing fee',
+             order_id: orderData.id,
+             handler: async function (response: any) {
+               await fetch('/api/payment/verify-listing', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    propertyId
+                 })
+               });
+               formState.resetForm();
+               alert("Property published and activated successfully!");
+               router.push('/owner/dashboard');
+             },
+             prefill: {
+               name: 'Owner',
+               contact: '9999999999'
+             },
+             theme: { color: '#801786' }
+           };
+           
+           const rzp = new (window as any).Razorpay(options);
+           rzp.on('payment.failed', function (response: any){
+              alert("Payment Failed! Property saved but inactive. " + response.error.description);
+              router.push('/owner/dashboard');
+           });
+           rzp.open();
+
        } else {
            alert("Failed to create property. " + (data.error || data.message || "Unknown error"));
        }

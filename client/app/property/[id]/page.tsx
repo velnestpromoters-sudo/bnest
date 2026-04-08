@@ -22,12 +22,63 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [paymentUnlocked, setPaymentUnlocked] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const simulatePayment = () => {
-      setIsProcessingPayment(true);
-      setTimeout(() => {
+  const handleUnlockPayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      const orderRes = await fetch('/api/payment/create-access', { method: 'POST' });
+      const orderData = await orderRes.json();
+      
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock_id',
+        amount: orderData.amount,
+        currency: 'INR',
+        name: 'Homyvo Property Access',
+        description: 'Unlock Owner Contact Details',
+        order_id: orderData.id,
+        handler: async function (response: any) {
+          const verifyRes = await fetch('/api/payment/verify-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              propertyId: id,
+              userId: user?._id
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setPaymentUnlocked(true);
+            setAccess('full');
+            // Re-fetch property to get actual completely unredacted contact data!
+            const refreshed = await api.get(`/properties/${id}`);
+            if (refreshed.data.success) {
+               setProperty(refreshed.data.data);
+            }
+          } else {
+             alert('Payment verification failed');
+          }
           setIsProcessingPayment(false);
-          setPaymentUnlocked(true);
-      }, 1500);
+        },
+        prefill: {
+          name: user?.name || 'Tenant',
+          contact: '9999999999'
+        },
+        theme: { color: '#ec38b7' }
+      };
+      
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any){
+         alert("Payment Failed! " + response.error.description);
+         setIsProcessingPayment(false);
+      });
+      rzp.open();
+    } catch (err) {
+      console.error(err);
+      alert("Payment initialization error");
+      setIsProcessingPayment(false);
+    }
   };
 
   // We fall back to mock data if no db is linked just for demo
@@ -163,21 +214,43 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             {/* Owner Details */}
-             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Owner Credentials</p>
-                <p className="font-black text-slate-800 text-xl mb-1">{property.ownerId?.name || 'Verified Owner'}</p>
-                <p className="font-semibold text-[#ec38b7] text-lg tracking-wide mb-5">
-                   {property.ownerId?.mobile || '+91 98XXX XXXXX'}
-                </p>
+            {/* Owner Details Protected Box */}
+             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden">
                 
-                <div className="flex gap-3">
-                  <button onClick={() => window.open(`tel:${property.ownerId?.mobile}`, '_self')} className="flex-1 py-3 border-2 border-[#ec38b7] bg-purple-50 text-[#ec38b7] font-black rounded-xl text-sm shadow-sm active:scale-95 transition-all">
-                    Call Now
-                  </button>
-                  <button className="flex-1 py-3 bg-[#ec38b7] text-white font-black rounded-xl text-sm shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
-                    Request Visit
-                  </button>
+                <div className={access === 'limited' && !paymentUnlocked ? "blur-md pointer-events-none select-none transition-all duration-500" : "transition-all duration-500"}>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Owner Credentials</p>
+                  <p className="font-black text-slate-800 text-xl mb-1">{property.ownerId?.name || 'Verified Owner'}</p>
+                  <p className="font-semibold text-[#ec38b7] text-lg tracking-wide mb-5">
+                     {property.ownerId?.mobile || '+91 98XXX XXXXX'}
+                  </p>
+                  
+                  <div className="flex gap-3">
+                    <button onClick={() => window.open(`tel:${property.ownerId?.mobile}`, '_self')} className="flex-1 py-3 border-2 border-[#ec38b7] bg-purple-50 text-[#ec38b7] font-black rounded-xl text-sm shadow-sm active:scale-95 transition-all">
+                      Call Now
+                    </button>
+                    <button className="flex-1 py-3 bg-[#ec38b7] text-white font-black rounded-xl text-sm shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
+                      Request Visit
+                    </button>
+                  </div>
                 </div>
+
+                {access === 'limited' && !paymentUnlocked && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/30 backdrop-blur-[2px]">
+                    <div className="bg-white px-6 py-5 rounded-2xl shadow-xl border border-purple-100 flex flex-col items-center text-center">
+                      <Lock className="w-8 h-8 text-[#801786] mb-2" />
+                      <p className="font-black text-slate-900 mb-1 text-base">Contact is Hidden</p>
+                      <p className="text-xs text-slate-500 mb-4 px-2 tracking-tight">Pay to instantly unlock direct phone number</p>
+                      <button 
+                         onClick={handleUnlockPayment}
+                         disabled={isProcessingPayment} 
+                         className="px-8 py-3 bg-[#801786] text-white font-black tracking-wide rounded-xl text-sm shadow-lg active:scale-95 transition-all w-full flex justify-center items-center gap-2"
+                      >
+                         {isProcessingPayment ? "Processing..." : "Unlock for ₹99"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
              </div>
           </div>
         )}
