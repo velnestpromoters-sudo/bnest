@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ArrowLeft, Faders, Flame } from 'phosphor-react'; // Using lucide-react equivalents since phosphor not installed. Wait, using lucide-react instead below.
 import { ArrowLeft as ArrowLeftLucide, Search as SearchLucide, SlidersHorizontal, TrendingUp, MapPin } from 'lucide-react';
 import { useLocationStore } from '@/store/locationStore';
 import { parseSearch } from '@/utils/parseSearch';
