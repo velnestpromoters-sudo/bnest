@@ -6,16 +6,19 @@ import { useRouter } from 'next/navigation';
 import BottomBar from '@/components/common/BottomBar';
 import { Search, SlidersHorizontal, MapPin, GraduationCap, Home, Star, LayoutDashboard, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocationStore } from '@/store/locationStore';
 import api from '@/lib/api';
 
 export default function HomeListPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
+  const { locationName } = useLocationStore();
   
   const [studentProperties, setStudentProperties] = useState<any[]>([]);
   const [familyProperties, setFamilyProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ... rest of the fetch properties logic and JSX
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -196,7 +199,7 @@ export default function HomeListPage() {
       </div>
 
       {/* BOTTOM NAVIGATION */}
-      <BottomBar location="" viewMode="list" />
+      <BottomBar location={locationName} viewMode="list" />
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
