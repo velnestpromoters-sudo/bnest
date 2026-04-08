@@ -32,14 +32,14 @@ export default function SearchPage() {
         let targetLng = coordinates?.lng || null;
 
         // Smart Default: If no location explicitly found in text, use current context if available
-        if (!parsed.location && locationName && locationName !== 'Detecting...') {
-            parsed.location = locationName.replace('📍 ', '').split(',')[0].toLowerCase();
+        if (!parsed.locationText && locationName && locationName !== 'Detecting...') {
+            parsed.locationText = locationName.replace('📍 ', '').split(',')[0].toLowerCase();
         }
 
         // 1. Resolve Explicit Named Locations to Lat/Lng Anchor Point
-        if (parsed.location) {
+        if (parsed.locationText && typeof parsed.locationText === 'string') {
             try {
-                const geoRes = await fetch(`/api/search?q=${encodeURIComponent(parsed.location)}`);
+                const geoRes = await fetch(`/api/search?q=${encodeURIComponent(parsed.locationText)}`);
                 const geoData = await geoRes.json();
                 if (geoData.success && geoData.features && geoData.features.length > 0) {
                     const [geoLng, geoLat] = geoData.features[0].geometry.coordinates;
@@ -50,25 +50,9 @@ export default function SearchPage() {
         }
 
         // 2. Hardware GPS Fallback for exact proximity if location hasn't been explicitly anchored yet
-        if ((parsed.near || parsed.radius || (!parsed.location && targetLat && targetLng)) && !parsed.lat) {
+        if ((parsed.useGeo || parsed.radius || (!parsed.locationText && targetLat && targetLng)) && !parsed.lat) {
            parsed.lat = targetLat;
            parsed.lng = targetLng;
-           
-           if (!targetLat && 'geolocation' in navigator) {
-             const getHardwarePos = () => new Promise<{lat: number, lng: number}>((res, rej) => {
-                navigator.geolocation.getCurrentPosition(
-                  pos => res({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                  err => rej(err)
-                );
-             });
-             try {
-                const livePos = await getHardwarePos();
-                parsed.lat = livePos.lat;
-                parsed.lng = livePos.lng;
-             } catch(e) {
-                console.warn('GPS location declined, bounding to standard text fallback');
-             }
-           }
         }
         
         // Final sanity check for distances ensuring we have a $near fallback parameter dynamically injected
