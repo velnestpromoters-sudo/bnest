@@ -20,6 +20,16 @@ export const extractMinPrice = (q: string): number | null => {
   return null;
 };
 
+export const extractRadius = (q: string): number | null => {
+  const match = q.match(/within\s*(\d+)\s*(km|kms|kilometers)/i) || 
+                q.match(/with\s*in\s*(\d+)\s*(km|kms|kilometers)/i) ||
+                q.match(/(\d+)\s*(km|kms|kilometers)\s*(radius)?/i);
+  if (match && match[1]) {
+     return parseInt(match[1]);
+  }
+  return null;
+};
+
 export const extractLocation = (q: string): string | null => {
   // Common areas in TN / Coimbatore
   const areas = ['peelamedu', 'saravanampatti', 'rs puram', 'gandhipuram', 'kavundampalayam', 'vada valli', 'singanallur', 'kuniamuthur', 'thudiyalur'];
@@ -64,7 +74,8 @@ export const parseSearch = (query: string) => {
     maxPrice: extractMaxPrice(q),
     minPrice: extractMinPrice(q),
     
-    near: q.includes("near") || q.includes("around") || q.includes("nearby"),
+    radius: extractRadius(q),
+    near: q.includes("near") || q.includes("around") || q.includes("nearby") || q.includes("within") || q.includes("with in"),
     location: extractLocation(q),
     
     bhkType: extractBHK(q),

@@ -37,10 +37,11 @@ export default function SearchPage() {
         }
 
         // Deep Geolocation Integration for accurate $near matching
-        if (parsed.near || (!parsed.location && targetLat && targetLng)) {
+        if (parsed.near || parsed.radius || (!parsed.location && targetLat && targetLng)) {
            parsed.lat = targetLat;
            parsed.lng = targetLng;
-           parsed.radius = 8; // kilometers fallback radius
+           // If parser didn't extract a strict numerical radius, we fall back to 8
+           if (!parsed.radius) parsed.radius = 8;
            
            // If we don't have accurate coordinates yet, fall back to grabbing hardware GPS
            if (!targetLat && 'geolocation' in navigator) {
