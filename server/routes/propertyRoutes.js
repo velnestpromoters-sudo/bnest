@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const propertyController = require('../controllers/propertyController');
+const searchController = require('../controllers/searchController');
 const { checkTenantAuth, protect } = require('../middleware/authMiddleware');
 const { upload } = require('../middleware/upload');
 
+router.get('/search', searchController.searchProperties);
 router.get('/:id', checkTenantAuth, propertyController.getProperty);
 router.get('/', propertyController.getAllProperties); // general list
 
