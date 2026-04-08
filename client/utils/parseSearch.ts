@@ -1,89 +1,196 @@
-export const extractMaxPrice = (q: string): number | null => {
-  const match = q.match(/(under|below|max)\s*(rs|₹)?\s*(\d+)(k|000)?/i) || q.match(/(\d+)(k|000)?\s*(and under|or less)/i);
-  if (match) {
-    let numStr = match[3] || match[1];
-    let multiplier = (match[4] || match[2])?.toLowerCase() === 'k' ? 1000 : 1;
-    if (!multiplier && (match[3]?.length <= 2 || match[1]?.length <= 2)) multiplier = 1000;
-    return parseInt(numStr) * multiplier;
-  }
-  return null;
+// Enhanced Natural Language Intent Parser - Phase 3
+
+const TYPOS_MAP: Record<string, string> = {
+  pelamadu: 'peelamedu',
+  peelamdu: 'peelamedu',
+  saravanampati: 'saravanampatti',
+  kovai: 'coimbatore',
+  madras: 'chennai',
+  vada: 'vada valli',
+  thudiyalur: 'thudiyalur'
 };
 
-export const extractMinPrice = (q: string): number | null => {
-  const match = q.match(/(above|min)\s*(rs|₹)?\s*(\d+)(k|000)?/i);
-  if (match) {
-    let numStr = match[3];
-    let multiplier = match[4]?.toLowerCase() === 'k' ? 1000 : 1;
-    if (!multiplier && numStr.length <= 2) multiplier = 1000;
-    return parseInt(numStr) * multiplier;
-  }
-  return null;
-};
+const LOCATIONS = ['coimbatore', 'peelamedu', 'saravanampatti', 'rs puram', 'gandhipuram', 'kavundampalayam', 'vada valli', 'singanallur', 'kuniamuthur', 'thudiyalur', 'tiruppur', 'chennai', 'madurai'];
 
-export const extractRadius = (q: string): number | null => {
-  const match = q.match(/within\s*(\d+)\s*(km|kms|kilometers)/i) || 
-                q.match(/with\s*in\s*(\d+)\s*(km|kms|kilometers)/i) ||
-                q.match(/(\d+)\s*(km|kms|kilometers)\s*(radius)?/i);
-  if (match && match[1]) {
-     return parseInt(match[1]);
-  }
-  return null;
-};
+function resolveTypo(txt: string) {
+  let cleaned = txt;
+  Object.keys(TYPOS_MAP).forEach(t => {
+      if (cleaned.includes(t)) cleaned = cleaned.replace(t, TYPOS_MAP[t]);
+  });
+  return cleaned;
+}
 
-export const extractLocation = (q: string): string | null => {
-  // Common areas in TN / Coimbatore
-  const areas = ['peelamedu', 'saravanampatti', 'rs puram', 'gandhipuram', 'kavundampalayam', 'vada valli', 'singanallur', 'kuniamuthur', 'thudiyalur'];
-  for (let area of areas) {
-    if (q.includes(area)) return area;
+export const parseSearch = (query: string): any => {
+  let q = query.toLowerCase();
+  q = resolveTypo(q);
+  
+  const intent: any = {};
+
+  // 28. Negation Search
+  const exclude: any = {};
+  if (q.includes('no pg') || q.includes('not pg')) exclude.propertyType = 'pg';
+  if (q.includes('no sharing')) exclude.sharing = true;
+  if (q.includes('not for bachelors') || q.includes('no bachelors') || q.includes('family only')) {
+     intent.bachelorAllowed = false;
+  }
+  if (Object.keys(exclude).length > 0) intent.exclude = exclude;
+
+  // 1 & 16. Location + Multi-Location + Near Map
+  let foundLocs: string[] = [];
+  LOCATIONS.forEach(loc => {
+      // Avoid partial overlaps like 'vada' matching 'vada valli' inadvertently natively (handled by array distinctness implicitly)
+      if (q.includes(loc)) {
+          foundLocs.push(loc);
+      }
+  });
+  if (foundLocs.length > 0) {
+      intent.locationText = foundLocs.length === 1 ? foundLocs[0] : foundLocs;
+  }
+  const isNear = q.match(/\bnear\b|\baround\b|\bnearby\b|\bclose to\b|\bclosest\b|\bnearest\b/i);
+  if (isNear || q.includes('within') || q.includes('with in')) {
+      intent.useGeo = true;
+  }
+  if (q.includes('near me')) {
+      intent.useGeo = true;
+      delete intent.locationText; // Favor raw HW coords over random matches elsewhere
+  }
+
+  // 27. Landmark Search
+  const landmarkMatch = q.match(/near (\w+ (college|hospital|park|airport))/i);
+  if (landmarkMatch && !intent.locationText) {
+      intent.nearLandmark = landmarkMatch[1];
+      intent.useGeo = true;
+  }
+
+  // Radius Extraction
+  const radMatch = q.match(/within\s*(\d+)\s*(km|kms)/i) || 
+                   q.match(/with\s*in\s*(\d+)\s*(km|kms)/i) ||
+                   q.match(/(\d+)\s*(km|kms)/i);
+  if (radMatch) intent.radius = parseInt(radMatch[1]);
+
+  // 2 & 19 & 20. Pricing logic
+  const approxMatch = q.match(/around (\d+k?)/i) || q.match(/approx (\d+k?)/i);
+  if (approxMatch) {
+      let val = parseK(approxMatch[1]);
+      intent.minPrice = Math.max(0, val - 1000);
+      intent.maxPrice = val + 1000;
+  } else {
+      const minMatch = q.match(/(above|minimum|min)\s*(\d+k?)/i);
+      if (minMatch) intent.minPrice = parseK(minMatch[2]);
+      
+      const maxMatch = q.match(/(under|below|less than|max)\s*(\d+k?)/i);
+      if (maxMatch) intent.maxPrice = parseK(maxMatch[2]);
+      
+      const rangeMatch = q.match(/(\d+k?)\s*to\s*(\d+k?)/i);
+      if (rangeMatch) {
+          intent.minPrice = parseK(rangeMatch[1]);
+          intent.maxPrice = parseK(rangeMatch[2]);
+      }
   }
   
-  // Natural language extraction fallback
-  const nearMatch = q.match(/near\s+([a-z\s]+)/i) || q.match(/in\s+([a-z\s]+)/i);
-  if (nearMatch && nearMatch[1]) {
-    // Avoid accidentally grabbing filler words
-    const loc = nearMatch[1].split(' ')[0].trim();
-    if (!['a','the','college','hospital'].includes(loc)) return loc;
+  if (q.match(/\bcheap\b|\bbudget\b|\blow budget\b/)) intent.priceCategory = 'low';
+  if (q.match(/\bluxury\b|\bpremium\b|\bhigh end\b/)) intent.priceCategory = 'high';
+
+  // 3 & 17. Property Type
+  let pTypes = [];
+  if (q.includes('pg') || q.includes('hostel')) pTypes.push('pg');
+  if (q.includes('apartment') || q.includes('flat')) pTypes.push('apartment');
+  if (q.includes('house') || q.includes('villa')) pTypes.push('apartment'); // Default to apartment for residential block
+  if (q.includes('room') && pTypes.length === 0) pTypes.push('pg'); 
+  if (pTypes.length > 0) intent.propertyType = pTypes.length === 1 ? pTypes[0] : pTypes;
+
+  const bhkMatch = q.match(/(\d)\s*bhk/i);
+  if (bhkMatch) intent.bhkType = `${bhkMatch[1]}BHK`;
+
+  // 4. Gender
+  if (q.match(/\bboys\b|\bmens\b|\bmen\b/)) intent.gender = 'boys';
+  if (q.match(/\bgirls\b|\bladies\b|\bwomens\b|\bwomen\b/)) intent.gender = 'girls';
+
+  // 5 & 18. Sharing Options
+  const shareMatches = [...q.matchAll(/(\d)\s*(?:or)?\s*(\d)?\s*sharing/gi)];
+  if (shareMatches.length > 0) {
+      let shares = [];
+      for(let m of shareMatches) {
+          if (m[1]) shares.push(parseInt(m[1]));
+          if (m[2]) shares.push(parseInt(m[2]));
+      }
+      intent.sharing = shares.length === 1 ? shares[0] : shares;
   }
-  
-  return null;
+  if (q.includes('single sharing')) intent.sharing = 1;
+  if (q.includes('double sharing')) intent.sharing = 2;
+  if (q.includes('triple sharing')) intent.sharing = 3;
+
+  // 6. Bed var
+  if (q.includes('beds available') || q.includes('vacancy') || q.includes('available beds')) {
+      intent.availableBeds = true;
+  }
+
+  // 7. Bachelor / Families
+  if (q.includes('bachelor allowed') || q.includes('bachelor')) intent.bachelorAllowed = true;
+
+  // 8. Furnishing
+  if (q.includes('fully furnished')) intent.furnishing = 'full';
+  else if (q.includes('semi furnished')) intent.furnishing = 'semi';
+  else if (q.includes('unfurnished')) intent.furnishing = 'none';
+
+  // 9 & 23. Availability
+  if (q.match(/ready to move|available now|immediate(\s|ly)?/i)) intent.available = true;
+  if (q.match(/next month|from (june|july|aug|sep|oct|nov|dec|jan|feb|mar|apr|may)/i)) intent.availabilityDate = 'future';
+
+  // 10. Amenities
+  let amens = [];
+  if (q.includes('wifi')) amens.push('wifi');
+  if (q.includes('parking')) amens.push('parking');
+  if (q.match(/ac\b|\bac room/)) amens.push('ac');
+  if (q.match(/attached bathroom|attached bath/)) amens.push('attached_bathroom');
+  if (amens.length > 0) intent.amenities = amens;
+
+  // 12. Sorting
+  if (q.match(/cheap first|lowest price|cheap/)) intent.sort = 'price_low';
+  if (q.match(/closest|nearest|walking distance/)) {
+      intent.sort = 'nearest';
+      if (!intent.radius) intent.radius = 2; // Strict proximity assumption
+  }
+  if (q.includes('latest')) intent.sort = 'latest';
+
+  // 21. Room count
+  const rmMatch = q.match(/(\d)\s*(room|bedroom)/i);
+  if (rmMatch) intent.roomCount = parseInt(rmMatch[1]);
+  if (q.includes('single room')) intent.roomCount = 1;
+
+  // 22. Occupancy
+  const occMatch = q.match(/for (\d) (people|members)/i);
+  if (occMatch) intent.requiredCapacity = parseInt(occMatch[1]);
+
+  // 24. Owner Match
+  if (q.includes('strict owner')) intent.ownerPreference = 'strict';
+  if (q.includes('flexible') || q.includes('no restrictions') || q.includes('friendly')) intent.ownerPreference = 'flexible';
+
+  // 25. Trust Search
+  if (q.match(/verified|trusted|no fake/)) intent.isVerified = true;
+
+  // 30. Contextual memory (Stub hook)
+  if (q.match(/same as before|similar|more like this/)) intent.basedOnPrevious = true;
+
+  // 32. Wishlists
+  if (q.match(/show saved|wishlist/)) intent.wishlistOnly = true;
+
+  // 36. Smart Fail-safe Fallback
+  // If NO properties matched, fallback to default parameters seamlessly
+  if (Object.keys(intent).length === 0) {
+      intent.useGeo = true;
+      intent.radius = 5;
+      intent.sort = 'relevance';
+  }
+
+  return intent;
 };
 
-export const extractBHK = (q: string): string | null => {
-  const match = q.match(/(\d)\s*bhk/i);
-  if (match) return `${match[1]}BHK`;
-  if (q.includes('single') || q.includes('1bhk')) return '1BHK';
-  if (q.includes('double') || q.includes('2bhk')) return '2BHK';
-  return null;
-};
-
-export const extractSharing = (q: string): string | null => {
-  const match = q.match(/(\d)\s*sharing/i);
-  if (match) return match[1];
-  return null;
-};
-
-export const parseSearch = (query: string) => {
-  const q = query.toLowerCase();
-
-  return {
-    propertyType: q.includes("pg") || q.includes("hostel") ? "pg" : (q.includes("bhk") || q.includes("house") || q.includes("apartment")) ? "apartment" : null,
-    
-    gender: q.includes("boys") || q.includes("mens") || q.includes("men") ? "boys" :
-            q.includes("girls") || q.includes("womens") || q.includes("women") ? "girls" : null,
-
-    maxPrice: extractMaxPrice(q),
-    minPrice: extractMinPrice(q),
-    
-    radius: extractRadius(q),
-    near: q.includes("near") || q.includes("around") || q.includes("nearby") || q.includes("within") || q.includes("with in"),
-    location: extractLocation(q),
-    
-    bhkType: extractBHK(q),
-    
-    sharing: extractSharing(q),
-    
-    bachelorAllowed: q.includes("bachelor") || q.includes("students"),
-    
-    available: q.includes("available") || q.includes("ready"),
-  };
-};
+// Utils
+function parseK(str: string): number {
+    let raw = parseInt(str);
+    if (str.toLowerCase().includes('k')) return raw * 1000;
+    // Assume 3k if user just wrote "under 3" but logically means 3000
+    if (raw < 100 && raw > 0) return raw * 1000; 
+    return raw;
+}

@@ -76,11 +76,22 @@ export default function SearchPage() {
             parsed.radius = 8;
         }
 
-        // Clean out nulls and booleans before sending
-        const cleanParams = Object.fromEntries(
-            Object.entries(parsed).filter(([_, v]) => v != null && v !== false)
-        ) as Record<string, string>;
-
+        // Clean out nulls and booleans before sending, and safely serialize Objects/Arrays!
+        const cleanParams: Record<string, any> = {};
+        Object.entries(parsed).forEach(([key, value]) => {
+             if (value !== null && value !== false && value !== undefined) {
+                 if (typeof value === 'object' && !Array.isArray(value)) {
+                     // Exclude maps
+                     cleanParams[key] = JSON.stringify(value);
+                 } else if (Array.isArray(value)) {
+                     // Arrays -> Comma strings
+                     cleanParams[key] = value.join(',');
+                 } else {
+                     cleanParams[key] = String(value);
+                 }
+             }
+        });
+        
         const params = new URLSearchParams(cleanParams).toString();
         const res = await fetch(`/api/properties/search?${params}`);
         const data = await res.json();

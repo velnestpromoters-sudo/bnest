@@ -27,6 +27,8 @@ const propertySchema = new mongoose.Schema({
   matchScore: { type: Number, default: 0 },
   moveInReady: { type: Boolean, default: false },
   tenantNotes: { type: String, default: '' },
+  amenities: [{ type: String }],
+  furnishing: { type: String, enum: ['full', 'semi', 'none'], default: 'none' },
   propertyType: { type: String, enum: ['apartment', 'pg'], default: 'apartment' },
   pgDetails: {
     gender: { type: String, enum: ['boys', 'girls', 'co-living'] },
