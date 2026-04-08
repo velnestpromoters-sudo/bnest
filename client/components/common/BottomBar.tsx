@@ -13,7 +13,7 @@ export default function BottomBar({ location, viewMode }: BottomBarProps) {
   const router = useRouter();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 px-5 pt-3 pb-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40">
+    <div className="fixed bottom-0 left-0 right-0 px-5 pt-3 pb-6 bg-gradient-to-t from-violet-900 via-fuchsia-900/90 to-transparent z-40">
       <div className="flex justify-between items-center max-w-md mx-auto">
         
         {/* Toggle Mode Button */}
