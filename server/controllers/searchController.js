@@ -25,25 +25,22 @@ exports.searchProperties = async (req, res) => {
       $search: {
         index: "property_search",
         compound: {
+          should: [
+            {
+              text: {
+                query: queryText || "home",
+                path: ["title", "description", "location.area", "location.address"],
+                fuzzy: { maxEdits: 2 }
+              }
+            }
+          ],
+          minimumShouldMatch: 0,
           filter: [
              { equals: { path: "isActive", value: true } }
           ]
         }
       }
     };
-
-    // FUZZY TEXT SEARCH (Only injected if queryText has actual text)
-    if (queryText && queryText.trim().length > 0) {
-      searchStage.$search.compound.must = [
-        {
-          text: {
-            query: queryText.trim(),
-            path: ["title", "description", "location.area", "location.address"],
-            fuzzy: { maxEdits: 2 }
-          }
-        }
-      ];
-    }
 
     // GEO FILTER
     if (lat && lng) {
@@ -157,7 +154,23 @@ exports.searchProperties = async (req, res) => {
     pipeline.push({ $limit: 40 });
 
     // EXECUTE
-    const results = await Property.aggregate(pipeline);
+    let results = await Property.aggregate(pipeline);
+
+    // MONGODB NATIVE FALLBACK (If Atlas Search is building index or completely failed)
+    if (results.length === 0) {
+       const fallbackQuery = { isActive: true };
+       if (queryText) {
+          fallbackQuery["$or"] = [
+             { "location.area": new RegExp(queryText, "i") },
+             { "location.city": new RegExp(queryText, "i") },
+             { title: new RegExp(queryText, "i") }
+          ];
+       }
+       if (propertyType) fallbackQuery.propertyType = propertyType;
+       if (bhkType) fallbackQuery.bhkType = new RegExp(bhkType, "i");
+       
+       results = await Property.find(fallbackQuery).limit(30);
+    }
 
     res.status(200).json({ success: true, count: results.length, data: results });
   } catch (error) {
