@@ -10,7 +10,7 @@ const TYPOS_MAP: Record<string, string> = {
   thudiyalur: 'thudiyalur'
 };
 
-const LOCATIONS = ['coimbatore', 'peelamedu', 'saravanampatti', 'rs puram', 'gandhipuram', 'kavundampalayam', 'vada valli', 'singanallur', 'kuniamuthur', 'thudiyalur', 'tiruppur', 'chennai', 'madurai'];
+const LOCATIONS = ['coimbatore', 'peelamedu', 'saravanampatti', 'rs puram', 'gandhipuram', 'kavundampalayam', 'vada valli', 'singanallur', 'kuniamuthur', 'thudiyalur', 'tiruppur', 'chennai', 'madurai', 'kalapatti', 'peelamedu'];
 
 function resolveTypo(txt: string) {
   let cleaned = txt;

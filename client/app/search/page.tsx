@@ -60,8 +60,8 @@ export default function SearchPage() {
             parsed.radius = 8;
         }
 
-        // Clean out nulls and booleans before sending, and safely serialize Objects/Arrays!
-        const cleanParams: Record<string, any> = { queryText: searchQuery.trim() };
+        // Clean out nulls and booleans before sending, map parsed location isolating tanglish noise explicitly
+        const cleanParams: Record<string, any> = { queryText: parsed.locationText || searchQuery.trim() };
         Object.entries(parsed).forEach(([key, value]) => {
              if (value !== null && value !== false && value !== undefined) {
                  if (typeof value === 'object' && !Array.isArray(value)) {
