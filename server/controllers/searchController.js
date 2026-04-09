@@ -3,148 +3,168 @@ const Property = require("../models/Property");
 exports.searchProperties = async (req, res) => {
   try {
     const {
-      lat, lng, radius = 5,
-      maxPrice, minPrice, priceCategory,
+      queryText = "",
+      lat,
+      lng,
+      radius = 5000,
+      minPrice,
+      maxPrice,
       propertyType,
       gender,
       sharing,
       bhkType,
-      bachelorAllowed,
-      sort,
-      locationText,
-      nearLandmark,
-      availableBeds,
-      furnishing,
-      available,
-      availabilityDate,
       amenities,
-      roomCount,
-      requiredCapacity,
-      ownerPreference,
-      isVerified,
-      exclude,
-      wishlistOnly // Handled in a separate context natively later or handled via array filtering
+      furnishing,
+      availability,
+      bachelorAllowed
     } = req.query;
 
-    let query = { isActive: true };
+    const pipeline = [];
 
-    // 1. Geography & Bounding (Using $near natively sorts by distance)
-    if (lat && lng) {
-      query["location.coordinates"] = {
-        $near: {
-          $geometry: { type: "Point", coordinates: [Number(lng), Number(lat)] },
-          $maxDistance: Number(radius) * 1000,
-        },
-      };
-    } else if (locationText) {
-      // Fallback matching if we don't have exact lat/lng hooks from Photon Geocoder
-      const locs = locationText.split(',').map(l => new RegExp(l.trim(), "i"));
-      query["$or"] = [
-          { "location.area": { $in: locs } },
-          { "location.city": { $in: locs } },
-          { "location.address": { $in: locs } }
-      ];
-    } else if (nearLandmark) {
-      query["location.address"] = new RegExp(nearLandmark, "i");
-    }
-
-    // 2. Exclusion Negation engine
-    if (exclude) {
-       try {
-           const exclObj = JSON.parse(exclude);
-           // Translate Exclusion Schema bounds directly
-           if (exclObj.propertyType) query.propertyType = { $ne: exclObj.propertyType };
-           
-           if (exclObj.sharing) {
-               // Must exclude anything matching sharing limits
-               if (!query["pgDetails.rooms"]) query["pgDetails.rooms"] = {};
-               query["pgDetails.rooms"].$not = { $elemMatch: { sharing: { $exists: true } } };
-           }
-       } catch(e) { console.warn("Failed to parse Exclude object", e); }
-    }
-
-    // 3. Property Type Bounding (Accepts Arrays "pg,apartment")
-    if (propertyType) {
-        if (!query.propertyType) { // Avoid over-writing the $ne block
-            const types = propertyType.split(',');
-            query.propertyType = types.length === 1 ? types[0] : { $in: types };
+    // ATLAS SEARCH STAGE
+    const searchStage = {
+      $search: {
+        index: "property_search",
+        compound: {
+          must: [],
+          filter: []
         }
-    }
-
-    // 4. Price Elasticity Engine
-    if (maxPrice || minPrice || priceCategory) {
-      query.rent = {};
-      if (maxPrice) query.rent.$lte = Number(maxPrice);
-      if (minPrice) query.rent.$gte = Number(minPrice);
-      
-      if (priceCategory === 'low') query.rent.$lte = 10000;
-      if (priceCategory === 'high') query.rent.$gte = 25000;
-      
-      // Cleanup empty rent bound if no numerical overlaps hit
-      if (Object.keys(query.rent).length === 0) delete query.rent;
-    }
-
-    // 5. Gender Targeting
-    if (gender) query["pgDetails.gender"] = gender;
-
-    // 6. Sharing Structure (Also accepts nested arrays "single,double" encoded as "1,2")
-    if (sharing) {
-      const shareTypes = sharing.split(',').map(s => Number(s));
-      query["pgDetails.rooms"] = {
-        $elemMatch: {
-          sharing: shareTypes.length === 1 ? shareTypes[0] : { $in: shareTypes }
-        }
-      };
-      if (availableBeds === 'true') {
-         query["pgDetails.rooms"].$elemMatch.availableBeds = { $gt: 0 };
       }
-    } else if (availableBeds === 'true') {
-        query["pgDetails.rooms"] = { $elemMatch: { availableBeds: { $gt: 0 } } };
+    };
+
+    if (queryText) {
+      searchStage.$search.compound.must.push({
+        text: {
+          query: queryText,
+          path: ["title", "description", "location.area", "location.address"],
+          fuzzy: { maxEdits: 2 }
+        }
+      });
     }
 
-    // 7. Core Apartments Bounding
-    if (bhkType) query.bhkType = new RegExp(bhkType, "i");
-    
-    // 8. Family vs Bachelors
-    if (bachelorAllowed !== undefined && bachelorAllowed !== "false") {
-        query["preferences.bachelorAllowed"] = true;
-    } else if (bachelorAllowed === "false") {
-        query["preferences.bachelorAllowed"] = false;
+    // GEO FILTER
+    if (lat && lng) {
+      searchStage.$search.compound.filter.push({
+        geoWithin: {
+          circle: {
+            center: {
+              type: "Point",
+              coordinates: [Number(lng), Number(lat)]
+            },
+            radius: Number(radius)
+          },
+          path: "location.coordinates"
+        }
+      });
     }
 
-    // 9. Furnishing State
-    if (furnishing) query.furnishing = furnishing;
+    // PRICE FILTER
+    if (minPrice || maxPrice) {
+      searchStage.$search.compound.filter.push({
+        range: {
+          path: "rent",
+          gte: minPrice ? Number(minPrice) : 0,
+          lte: maxPrice ? Number(maxPrice) : 1000000
+        }
+      });
+    }
 
-    // 10. Availability & Temporal bounds
-    if (available === 'true') query.moveInReady = true;
+    // PROPERTY TYPE
+    if (propertyType) {
+      searchStage.$search.compound.filter.push({
+        text: {
+          path: "propertyType",
+          query: propertyType
+        }
+      });
+    }
 
-    // 11. Multi-Condition Amenity Engine ($all requires all tags)
+    // PG FILTERS
+    if (propertyType === "pg" || propertyType?.includes("pg")) {
+      if (gender) {
+        searchStage.$search.compound.filter.push({
+          text: {
+            path: "pgDetails.gender",
+            query: gender
+          }
+        });
+      }
+
+      if (sharing) {
+        searchStage.$search.compound.filter.push({
+          equals: {
+            path: "pgDetails.rooms.sharing",
+            value: Number(sharing)
+          }
+        });
+      }
+    }
+
+    // BHK
+    if (bhkType) {
+      searchStage.$search.compound.filter.push({
+        text: {
+          path: "bhkType",
+          query: bhkType
+        }
+      });
+    }
+
+    // AMENITIES
     if (amenities) {
-        const reqAmens = amenities.split(',');
-        query.amenities = { $all: reqAmens };
+      searchStage.$search.compound.filter.push({
+        text: {
+          query: amenities.split(","),
+          path: "amenities"
+        }
+      });
     }
 
-    // 12. Capacity Overrides
-    if (requiredCapacity) query["preferences.maxOccupants"] = { $gte: Number(requiredCapacity) };
-    
-    // 13. Security Bounding
-    if (isVerified === 'true') query.isVerified = true;
-
-    // 14. Room Counts
-    if (roomCount) query["pgDetails.totalRooms"] = { $gte: Number(roomCount) };
-
-    // Sorting Output Matrices
-    let sortObj = {};
-    if (sort === "price_low") sortObj.rent = 1;
-    else if (sort === "price_high") sortObj.rent = -1;
-    else if (sort === "latest") sortObj.createdAt = -1;
-    
-    // Fallback relevance
-    if (!lat || !lng) {
-       if (!Object.keys(sortObj).length) sortObj.matchScore = -1; 
+    // FURNISHING
+    if (furnishing) {
+      searchStage.$search.compound.filter.push({
+        text: {
+          path: "furnishing",
+          query: furnishing
+        }
+      });
     }
 
-    const results = await Property.find(query).sort(sortObj).limit(40);
+    // AVAILABILITY
+    if (availability) {
+      searchStage.$search.compound.filter.push({
+        text: {
+          path: "availability",
+          query: availability
+        }
+      });
+    }
+    
+    // BACHELORS
+    if (bachelorAllowed !== undefined && bachelorAllowed !== "false") {
+      searchStage.$search.compound.filter.push({
+          equals: {
+              path: "preferences.bachelorAllowed",
+              value: true
+          }
+      });
+    }
+
+    if (searchStage.$search.compound.must.length === 0) {
+      delete searchStage.$search.compound.must;
+    }
+    if (searchStage.$search.compound.filter.length === 0) {
+      delete searchStage.$search.compound.filter;
+    }
+
+    if (searchStage.$search.compound.must || searchStage.$search.compound.filter) {
+      pipeline.push(searchStage);
+    }
+    
+    pipeline.push({ $match: { isActive: true } });
+    pipeline.push({ $limit: 30 });
+
+    const results = await Property.aggregate(pipeline);
 
     res.status(200).json({ success: true, count: results.length, data: results });
   } catch (error) {
