@@ -66,7 +66,7 @@ export default function SearchPage() {
         }
         
         // Clean out nulls and booleans before sending, map parsed location isolating tanglish noise explicitly
-        const cleanParams: Record<string, any> = { queryText: parsed.locationText || fallBackParamStr };
+        const cleanParams: Record<string, any> = { queryText: parsed.locationText || parsed.cleanText || fallBackParamStr };
         Object.entries(parsed).forEach(([key, value]) => {
              if (value !== null && value !== false && value !== undefined) {
                  if (typeof value === 'object' && !Array.isArray(value)) {

@@ -103,18 +103,18 @@ export const parseSearch = (query: string): any => {
 
   // 3 & 17. Property Type (Tanglish injected)
   let pTypes = [];
-  if (q.includes('pg') || q.includes('hostel')) pTypes.push('pg');
-  if (q.includes('apartment') || q.includes('flat') || q.includes('veedu') || q.includes('voodu')) pTypes.push('apartment');
-  if (q.includes('house') || q.includes('villa')) pTypes.push('apartment'); // Default to apartment for residential block
-  if (q.includes('room') && pTypes.length === 0) pTypes.push('pg'); 
+  if (q.includes('pg') || q.includes('hostel')) { pTypes.push('pg'); stripRegex(/\bpg\b|\bhostel\b/g); }
+  if (q.includes('apartment') || q.includes('flat') || q.includes('veedu') || q.includes('voodu')) { pTypes.push('apartment'); stripRegex(/\bapartment\b|\bflat\b|\bveedu\b|\bvoodu\b/g); }
+  if (q.includes('house') || q.includes('villa')) { pTypes.push('apartment'); stripRegex(/\bhouse\b|\bvilla\b/g); }
+  if (q.includes('room') && pTypes.length === 0) { pTypes.push('pg'); stripRegex(/\broom\b/g); } 
   if (pTypes.length > 0) intent.propertyType = pTypes.length === 1 ? pTypes[0] : pTypes;
 
   const bhkMatch = q.match(/(\d)\s*bhk/i);
-  if (bhkMatch) intent.bhkType = `${bhkMatch[1]}BHK`;
+  if (bhkMatch) { intent.bhkType = `${bhkMatch[1]}BHK`; stripRegex(/(\d)\s*bhk/i); }
 
   // 4. Gender (Tanglish injected)
-  if (q.match(/\bboys\b|\bmens\b|\bmen\b|\bpasanga\b|\baambala\b|\bgents\b/)) intent.gender = 'boys';
-  if (q.match(/\bgirls\b|\bladies\b|\bwomens\b|\bwomen\b|\bponnunga\b|\bpengal\b/)) intent.gender = 'girls';
+  if (q.match(/\bboys\b|\bmens\b|\bmen\b|\bpasanga\b|\baambala\b|\bgents\b/)) { intent.gender = 'boys'; stripRegex(/\bboys\b|\bmens\b|\bmen\b|\bpasanga\b|\baambala\b|\bgents\b/g); }
+  if (q.match(/\bgirls\b|\bladies\b|\bwomens\b|\bwomen\b|\bponnunga\b|\bpengal\b/)) { intent.gender = 'girls'; stripRegex(/\bgirls\b|\bladies\b|\bwomens\b|\bwomen\b|\bponnunga\b|\bpengal\b/g); }
 
   // 5 & 18. Sharing Options
   const shareMatches = [...q.matchAll(/(\d)\s*(?:or)?\s*(\d)?\s*sharing/gi)];
@@ -191,6 +191,12 @@ export const parseSearch = (query: string): any => {
       intent.useGeo = true;
       intent.radius = 5;
       intent.sort = 'relevance';
+  }
+
+  // Assign stripped noise string back to intent for clean API parsing
+  const cleanNoiseStr = shadowStr.replace(/\s+/g, ' ').trim();
+  if (cleanNoiseStr) {
+      intent.cleanText = cleanNoiseStr;
   }
 
   return intent;
