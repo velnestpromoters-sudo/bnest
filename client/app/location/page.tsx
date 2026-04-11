@@ -58,14 +58,34 @@ export default function LocationTracker() {
      return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Handle User tapping a dropdown result 
-  const handleSelectResult = (result: any) => {
-      const [lon, lat] = result.geometry.coordinates; // GeoJSON puts Longitude first!
-      setForceFlyTo([lat, lon]); // Turbo 0.4s Cinematic Map Fly!
+  // Unified Background Confirm Action natively avoiding multiple explicit confirms
+  const confirmCoordinates = async (lat: number, lng: number) => {
+      setIsConfirming(true);
+      try {
+          const res = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
+          const data = await res.json();
+          if (data.success && data.location) {
+             setLocation(`📍 ${data.location}`, { lat, lng });
+          } else {
+             setLocation('📍 Unknown Area', { lat, lng });
+          }
+          router.push('/home'); // Swoop back to Reel with fresh location!
+      } catch (err) {
+          console.error("OSM Geocoding failed:", err);
+          setLocation('📍 Map Area', { lat, lng });
+          router.push('/home');
+      }
+  };
+
+  // Handle User tapping a dropdown result natively forcing instantly secure confirmation
+  const handleSelectResult = async (result: any) => {
+      const [lon, lat] = result.geometry.coordinates; // GeoJSON
+      setForceFlyTo([lat, lon]); 
       
-      // Clear UI
       setSearchQuery('');
       setSearchResults([]);
+      
+      await confirmCoordinates(lat, lon); // Auto-confirms gracefully!
   };
 
   // If user explicitly taps the "Search" button instead of selecting a dropdown item
@@ -86,6 +106,8 @@ export default function LocationTracker() {
               
               setSearchQuery('');
               setSearchResults([]);
+              
+              await confirmCoordinates(lat, lon); // Native 1-click auto-confirm
           } else {
               alert("Location not found! Try searching a nearby neighborhood.");
           }
@@ -104,8 +126,10 @@ export default function LocationTracker() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
          const { latitude, longitude } = pos.coords;
-         setForceFlyTo([latitude, longitude]); // Ultra-Fast 0.4s Map Fly
-         setIsLocating(false);
+         setForceFlyTo([latitude, longitude]); 
+         
+         // Completely automated confirmation hook bypassing the removed explicit button natively
+         confirmCoordinates(latitude, longitude);
       },
       (err) => {
          console.warn("GPS Permission Denied:", err);
@@ -114,33 +138,6 @@ export default function LocationTracker() {
       },
       { enableHighAccuracy: true }
     );
-  };
-
-  // Final Geocoding Step (Triggered only by the Confirm button)
-  const handleConfirmLocation = async () => {
-      setIsConfirming(true);
-      const [lat, lng] = needlePosition;
-
-      try {
-          // Hits our Secure Proxy
-          const res = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
-          const data = await res.json();
-          
-          if (data.success && data.location) {
-             setLocation(`📍 ${data.location}`, { lat, lng });
-          } else {
-             setLocation('📍 Unknown Area', { lat, lng });
-          }
-          
-          router.push('/home'); // Swoop back to Reel with fresh location!
-
-      } catch (err) {
-          console.error("OSM Geocoding failed:", err);
-          setLocation('📍 Map Area', { lat, lng });
-          router.push('/home');
-      } finally {
-          setIsConfirming(false);
-      }
   };
 
   return (
@@ -218,30 +215,14 @@ export default function LocationTracker() {
 
       </header>
 
-      {/* 3. & 4. Unified Bottom Action UI (Side-by-Side Mobile Layout) */}
-      <div className="absolute bottom-4 left-4 right-4 z-30 flex gap-4 pointer-events-none items-end">
-         
-         {/* Left Bottom: Main Confirmation Card */}
-         <div className="flex-1 bg-white/10 backdrop-blur-2xl border border-white/30 rounded-3xl p-5 shadow-2xl pointer-events-auto max-w-sm">
-            <h3 className="font-extrabold text-white text-lg tracking-tight mb-1">Confirm Specific Location</h3>
-            <p className="text-white/60 text-xs font-medium mb-4 leading-relaxed line-clamp-2">Move the needle precisely to your target house or district via Search or GPS.</p>
-            
-            <button 
-                onClick={handleConfirmLocation}
-                disabled={isConfirming}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-[#ec38b7] text-white rounded-2xl font-black text-sm uppercase tracking-wide active:scale-[0.98] transition-all shadow-xl shadow-[#ec38b7]/30"
-            >
-                {isConfirming ? 'Pinpointing...' : 'Confirm Location Pin'}
-            </button>
-         </div>
-
-         {/* Right Bottom: Locator FAB (Pushed to bottom right to be accessible on all devices) */}
+      {/* 3. Locator FAB (Explicitly pulled out as a single automated tracker since Confirm banner is discarded natively) */}
+      <div className="absolute bottom-6 right-6 z-30 pointer-events-none items-end">
          <button 
              onClick={triggerGPSLocate}
-             disabled={isLocating}
+             disabled={isConfirming || isLocating}
              className="w-16 h-16 shrink-0 bg-white text-[#ec38b7] rounded-full shadow-2xl flex items-center justify-center border-2 border-white/50 active:scale-90 transition-transform hover:shadow-[#ec38b7]/40 hover:shadow-lg pointer-events-auto"
          >
-             {isLocating ? (
+             {(isLocating || isConfirming) ? (
                  <div className="w-6 h-6 border-2 border-[#ec38b7] border-t-transparent rounded-full animate-spin"></div>
              ) : (
                  <Navigation className="w-7 h-7 fill-[#ec38b7]/20" />

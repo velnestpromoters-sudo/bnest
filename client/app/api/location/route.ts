@@ -25,8 +25,17 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
 
     if (data && data.address) {
-      // Nominatim provides varying address block details: suburb, city_district, exact city, county, etc.
-      const detectedLocation = data.address.suburb || data.address.neighbourhood || data.address.city_district || data.address.city || data.address.county || 'Unknown Location';
+      // Bypass non-human micro-jurisdictions like "Ward 36" by explicitly filtering out numerics when parsing the hierarchy natively
+      const validName = (name: string | undefined) => (name && !name.toLowerCase().includes('ward') && !/\d/.test(name)) ? name : null;
+      
+      const detectedLocation = validName(data.address.suburb) 
+                            || validName(data.address.village)
+                            || validName(data.address.town)
+                            || validName(data.address.city_district) 
+                            || validName(data.address.neighbourhood)
+                            || validName(data.address.city) 
+                            || 'Unknown Location';
+
       return NextResponse.json({ success: true, location: detectedLocation, raw: data });
     } else {
       return NextResponse.json({ success: false, error: 'No precise district found' }, { status: 404 });
