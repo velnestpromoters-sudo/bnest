@@ -3,7 +3,7 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
-import { ArrowLeft, Share2, MapPin, Bed, Bath, TriangleRight, Key, ShieldCheck, CheckCircle2, ChevronRight, PlayCircle, Eye, Lock } from 'lucide-react';
+import { ArrowLeft, Share2, MapPin, Bed, Bath, TriangleRight, Key, ShieldCheck, CheckCircle2, ChevronRight, PlayCircle, Eye, Lock, X } from 'lucide-react';
 import { useAuthModalStore } from '@/store/authModalStore';
 import { useAuthStore } from '@/store/authStore';
 
@@ -16,6 +16,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const { openModal } = useAuthModalStore();
   
   const [activeImage, setActiveImage] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
   const [property, setProperty] = useState<any>(null);
   const [access, setAccess] = useState<'limited' | 'full'>('limited');
   const [loading, setLoading] = useState(true);
@@ -122,8 +123,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
-      <div className="relative h-64 w-full bg-slate-200">
+      <div className="relative h-64 w-full bg-slate-200 cursor-pointer active:opacity-95 transition-opacity" onClick={() => setShowGallery(true)}>
         <img src={property.images[0]} alt="Prop" className="w-full h-full object-cover" />
+        
+        {property.images.length > 0 && (
+            <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg border border-white/20">
+               <Eye className="w-3.5 h-3.5" /> 1 / {property.images.length} Photos
+            </div>
+        )}
         <button onClick={() => router.back()} className="absolute top-4 left-4 p-2 bg-black/40 rounded-full text-white backdrop-blur-md z-10 transition-colors hover:bg-black/60">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -263,6 +270,31 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </div>
         )}
       </div>
+
+      {/* Full Screen Image Gallery Modal */}
+      {showGallery && property.images && property.images.length > 0 && (
+          <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-4 flex justify-between items-center sticky top-0 bg-gradient-to-b from-black/90 to-transparent z-10">
+                  <span className="text-white font-black tracking-wide text-sm">{property.images.length} Photos</span>
+                  <button 
+                      onClick={() => setShowGallery(false)} 
+                      className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md border border-white/20 transition-colors"
+                  >
+                      <X className="w-5 h-5" />
+                  </button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-4 pb-20 flex flex-col gap-6">
+                  {property.images.map((img: string, idx: number) => (
+                      <div key={idx} className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-900">
+                          <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-auto object-contain" />
+                          <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg text-white/80 font-mono text-[10px] uppercase font-bold">
+                              {idx + 1} / {property.images.length}
+                          </div>
+                      </div>
+                  ))}
+              </div>
+          </div>
+      )}
     </div>
   );
 }
