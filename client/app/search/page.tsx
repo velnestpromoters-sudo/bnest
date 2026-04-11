@@ -13,6 +13,8 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Hardware Tracking Handler
   const handleTargetLocation = () => {
@@ -39,14 +41,17 @@ export default function SearchPage() {
 
   // Geographic Coordinate Search Hook
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
+    // Main Debounced Search Hook
     const timer = setTimeout(async () => {
       setIsSearching(true);
+
+      // Instantly clear dropdown if input is entirely wiped natively
+      if (!searchQuery.trim()) {
+         setSuggestions([]);
+         setSearchResults([]);
+         setIsSearching(false);
+         return;
+      }
       try {
         const rawText = searchQuery.toLowerCase();
         
@@ -84,6 +89,22 @@ export default function SearchPage() {
                 if (geoData && geoData.length > 0) {
                     lat = geoData[0].lat;
                     lng = geoData[0].lon;
+                    
+                    // Generate predictive suggestions natively extracting localized string names mapped against user prefix intent
+                    const places = geoData.map((g: any) => g.display_name.split(',')[0]).filter(Boolean);
+                    const lowerText = rawText.toLowerCase();
+                    const lowerTarget = targetGeo.toLowerCase();
+                    let prefix = "";
+                    if (lowerText.includes(lowerTarget) && targetGeo.length > 0) {
+                       prefix = rawText.substring(0, lowerText.lastIndexOf(lowerTarget));
+                    }
+                    
+                    // Build prediction list eliminating duplicates
+                    const uniquePlaces = Array.from(new Set(places)) as string[];
+                    const newSuggestions = uniquePlaces.slice(0, 3).map((place: string) => `${prefix}${place}`.trim());
+                    setSuggestions(newSuggestions);
+                } else {
+                    setSuggestions([]);
                 }
             } catch (e) { console.warn("OSM Geocoding failed", e); }
         }
@@ -130,9 +151,13 @@ export default function SearchPage() {
             autoFocus
             type="text" 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+            }}
             placeholder='Try "girls pg near saravanampatti"' 
             className="w-full bg-slate-100 placeholder:text-slate-400 text-slate-900 font-bold tracking-tight text-[14px] pl-5 pr-12 py-3.5 rounded-full outline-none focus:ring-2 focus:ring-[#801786]/20 focus:bg-white border border-transparent focus:border-[#801786] transition-all shadow-inner"
+            onFocus={() => setShowSuggestions(true)}
           />
           <div className="absolute right-4 pointer-events-none">
             {isSearching ? (
@@ -141,6 +166,25 @@ export default function SearchPage() {
                 <SearchLucide className="w-5 h-5 text-slate-400" />
             )}
           </div>
+          
+          {/* Predictive Google-Styled Dropdown */}
+          {showSuggestions && suggestions.length > 0 && searchQuery.trim().length > 0 && (
+             <div className="absolute top-[110%] left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-200">
+                {suggestions.map((sug, i) => (
+                    <button 
+                       key={i} 
+                       className="w-full text-left px-5 py-3.5 hover:bg-slate-50 flex items-center gap-3 transition-colors active:bg-slate-100 border-b border-slate-50 last:border-0"
+                       onClick={() => {
+                          setSearchQuery(sug);
+                          setShowSuggestions(false);
+                       }}
+                    >
+                       <SearchLucide className="w-4 h-4 text-[#801786] shrink-0 opacity-40" />
+                       <span className="text-slate-700 font-medium text-sm line-clamp-1">{sug}</span>
+                    </button>
+                ))}
+             </div>
+          )}
         </div>
 
         <button 
