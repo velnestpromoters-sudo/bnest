@@ -57,7 +57,7 @@ exports.getProperty = async (req, res) => {
         rent: property.rent,
         deposit: property.deposit,
         bhkType: property.bhkType,
-        images: property.images.slice(0, 1),
+        images: property.images,
         isVerified: property.isVerified,
         matchScore: property.matchScore,
         moveInReady: property.moveInReady,
