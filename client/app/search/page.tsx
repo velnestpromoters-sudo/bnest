@@ -14,7 +14,7 @@ export default function SearchPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
-  // Simple Debounce Search
+  // Geographic Coordinate Search Hook
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -25,19 +25,52 @@ export default function SearchPage() {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const query = encodeURIComponent(searchQuery.trim());
-        const res = await fetch(`/api/properties/search?queryText=${query}&_t=${Date.now()}`, { cache: 'no-store' });
+        const rawText = searchQuery.toLowerCase();
+        
+        // Lightweight geographic stripper (removes nouns so Nominatim doesn't fail)
+        const cleanForGeo = rawText
+            .replace(/\b(pg|boys|girls|rent|house|apartment|bhk|room|flat|villa|mens|womens|in|near|around|for)\b/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        const targetGeo = cleanForGeo || rawText.trim();
+        
+        let lat = null;
+        let lng = null;
+
+        // 1. Forward Geocode the Cleaned Location String natively
+        try {
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(targetGeo)}&limit=1`, {
+                headers: { 'User-Agent': 'bnest-geo-engine' }
+            });
+            const geoData = await geoRes.json();
+            if (geoData && geoData.length > 0) {
+                lat = geoData[0].lat;
+                lng = geoData[0].lon;
+            }
+        } catch (e) { console.warn("OSM Geocoding failed", e); }
+
+        // 2. Transmit strict coords to backend API
+        const params = new URLSearchParams();
+        params.append('queryText', rawText.trim());
+        if (lat && lng) {
+            params.append('lat', lat);
+            params.append('lng', lng);
+            // Engine will natively try 3KM cutoff in backend, falling back to 5KM logic natively.
+        }
+
+        const res = await fetch(`/api/properties/search?${params.toString()}&_t=${Date.now()}`, { cache: 'no-store' });
         const data = await res.json();
         
         if (data.success) {
           setSearchResults(data.data || []);
         }
       } catch (err) {
-        console.error("Search Engine Failed", err);
+        console.error("Geographic Search Engine Failed", err);
       } finally {
         setIsSearching(false);
       }
-    }, 500); // 500ms debounce
+    }, 700); // 700ms debounce (slightly longer to protect OSM rates)
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
