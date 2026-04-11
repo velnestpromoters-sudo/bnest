@@ -26,11 +26,17 @@ function CenterTracker({ onCenterChange, forcePosition }: { onCenterChange: (pos
       }
   });
 
+  const lastFlown = React.useRef<string | null>(null);
+
   // Whenever forcePosition updates (e.g. from "Pick Me" button or Search Bar), fly exactly to it cinematically
   useEffect(() => {
     if (forcePosition) {
-       map.flyTo(forcePosition, 18, { animate: true, duration: 0.15 }); // Ultra-Fast cinematic zoom to street level
-       onCenterChange(forcePosition);
+       const strPos = `${forcePosition[0]},${forcePosition[1]}`;
+       if (lastFlown.current !== strPos) {
+           lastFlown.current = strPos;
+           map.flyTo(forcePosition, 18, { animate: true, duration: 0.15 }); // Ultra-Fast cinematic zoom to street level
+           onCenterChange(forcePosition);
+       }
     }
   }, [forcePosition, map, onCenterChange]);
 

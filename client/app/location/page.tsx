@@ -128,6 +128,7 @@ export default function LocationTracker() {
          const { latitude, longitude } = pos.coords;
          setForceFlyTo([latitude, longitude]); 
          
+         setIsLocating(false); // Stop tracking spin instantly natively!
          // Completely automated confirmation hook bypassing the removed explicit button natively
          confirmCoordinates(latitude, longitude);
       },

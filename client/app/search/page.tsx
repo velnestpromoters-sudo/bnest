@@ -55,22 +55,19 @@ export default function SearchPage() {
       try {
         const rawText = searchQuery.toLowerCase();
         
-        // Lightweight geographic stripper (removes nouns and distance parameters so Nominatim doesn't fail)
+        // Lightweight geographic stripper (removes nouns so Nominatim doesn't fail)
         const cleanForGeo = rawText
             .replace(/\b(pg|boys|girls|rent|house|apartment|bhk|room|flat|villa|mens|womens|in|near|around|for)\b/gi, '')
-            .replace(/\b(within|under|max)\s*\d+\s*(km|m|kilometers|meters|k)\b/gi, '') // NLP Distance Purger
             .replace(/\s+/g, ' ')
             .trim();
-        
-        let targetGeo = cleanForGeo;
 
+        const targetGeo = cleanForGeo || rawText.trim();
+        
         let lat = null;
         let lng = null;
 
         // 1. Hardware Bypass OR Forward Geocode
-        // Instantly switch to device GPS if explicitly requested, protecting queries like "near me within 3 km"
-        const rawLower = rawText.toLowerCase();
-        if (rawLower.includes("near me") || rawLower.includes("around me") || targetGeo === "me") {
+        if (targetGeo.toLowerCase() === "properties me" || targetGeo.toLowerCase() === "properties near me") {
             // Bypass OSM mapping entirely if the user manually activated the hardware tracker securely
             if (coordinates) {
                 lat = coordinates.lat;
@@ -78,7 +75,7 @@ export default function SearchPage() {
             }
         } else {
             try {
-                let osmUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(targetGeo)}&limit=10&countrycodes=in`;
+                let osmUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(targetGeo)}&limit=10`;
                 
                 // If user activated their hardware tracker, inject soft bounding bias correcting duplicate town names spanning multiple cities
                 if (coordinates?.lat && coordinates?.lng) {
@@ -104,8 +101,18 @@ export default function SearchPage() {
                     
                     // Build prediction list eliminating duplicates maximizing tolerance resolution natively
                     const uniquePlaces = Array.from(new Set(places)) as string[];
-                    const newSuggestions = uniquePlaces.slice(0, 10).map((place: string) => `${prefix}${place}`.trim());
-                    setSuggestions(newSuggestions);
+                    
+                    if (prefix.trim() === "" && uniquePlaces.length > 0) {
+                        const intents = ["Boys PG near", "Girls PG near", "Family apartments in", "Bachelor allowed near"];
+                        let rawPicks: string[] = [];
+                        uniquePlaces.slice(0, 2).forEach((place) => {
+                            intents.forEach((intent) => rawPicks.push(`${intent} ${place}`));
+                        });
+                        setSuggestions(rawPicks.slice(0, 8)); // Top 8 smartest matching combos natively generated
+                    } else {
+                        const newSuggestions = uniquePlaces.slice(0, 10).map((place: string) => `${prefix}${place}`.trim());
+                        setSuggestions(newSuggestions);
+                    }
                 } else {
                     setSuggestions([]);
                 }
