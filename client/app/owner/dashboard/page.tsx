@@ -197,16 +197,30 @@ export default function OwnerDashboard() {
          ) : (
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {analytics.map((metric: any) => (
-                  <div key={metric._id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-md">
-                      <h4 className="font-bold text-gray-900 line-clamp-1">{metric.title}</h4>
-                      <div className="flex gap-4">
-                          <div className="flex-1 bg-purple-50 rounded-xl p-3 flex flex-col items-center justify-center border border-purple-100/50">
-                              <span className="text-[10px] font-extrabold text-purple-700 uppercase tracking-widest mb-1 shrink-0 text-center">Reel & Search Views</span>
-                              <span className="text-3xl font-black text-purple-900">{metric.views}</span>
-                          </div>
-                          <div className="flex-1 bg-green-50 rounded-xl p-3 flex flex-col items-center justify-center border border-green-100/50">
-                              <span className="text-[10px] font-extrabold text-green-700 uppercase tracking-widest mb-1 shrink-0 text-center">Paid Unlocks</span>
-                              <span className="text-3xl font-black text-green-900">{metric.unlocks}</span>
+                  <div key={metric._id} className="relative p-5 rounded-2xl shadow-sm border border-gray-100/50 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-lg overflow-hidden group">
+                      
+                      {/* Integrated Native Image Background Block */}
+                      <div className="absolute inset-0 z-0">
+                         {metric.images && metric.images[0] ? (
+                            <img src={metric.images[0]} alt="Property Background" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                         ) : (
+                            <div className="w-full h-full bg-slate-800" />
+                         )}
+                         {/* Heavy Glassmorphism Overlay ensuring bright text pops perfectly */}
+                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[4px]" />
+                      </div>
+
+                      <div className="relative z-10 flex flex-col gap-4">
+                          <h4 className="font-bold text-white line-clamp-1 drop-shadow-md text-lg">{metric.title}</h4>
+                          <div className="flex gap-4">
+                              <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-3 flex flex-col items-center justify-center border border-white/20 transition-colors group-hover:bg-white/15">
+                                  <span className="text-[10px] font-extrabold text-[#ec38b7] uppercase tracking-widest mb-1 shrink-0 text-center drop-shadow-sm">Total Views</span>
+                                  <span className="text-3xl font-black text-white drop-shadow-md">{metric.views}</span>
+                              </div>
+                              <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-3 flex flex-col items-center justify-center border border-white/20 transition-colors group-hover:bg-white/15">
+                                  <span className="text-[10px] font-extrabold text-green-300 uppercase tracking-widest mb-1 shrink-0 text-center drop-shadow-sm">Paid Unlocks</span>
+                                  <span className="text-3xl font-black text-white drop-shadow-md">{metric.unlocks}</span>
+                              </div>
                           </div>
                       </div>
                   </div>

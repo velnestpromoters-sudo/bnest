@@ -88,7 +88,7 @@ exports.registerView = async (req, res) => {
 
 exports.getOwnerAnalytics = async (req, res) => {
   try {
-     const ownerProps = await Property.find({ ownerId: req.user._id, isActive: true }).select('title uniqueViewers');
+     const ownerProps = await Property.find({ ownerId: req.user._id, isActive: true }).select('title uniqueViewers images');
      
      // Parallel aggregate execution efficiently matching transaction maps completely natively 
      let compiledData = [];
@@ -98,7 +98,8 @@ exports.getOwnerAnalytics = async (req, res) => {
              _id: prop._id,
              title: prop.title,
              views: prop.uniqueViewers ? prop.uniqueViewers.length : 0,
-             unlocks: unlockCount
+             unlocks: unlockCount,
+             images: prop.images
          });
      }
      
