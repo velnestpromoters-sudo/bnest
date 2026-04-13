@@ -375,6 +375,7 @@ export default function OwnerDashboard() {
                                  const data = await res.json();
                                  if (data.success) {
                                     setProperties(prev => prev.filter((p: any) => p._id !== availabilityModalData._id));
+                                    setAnalytics(prev => prev.filter((a: any) => a._id !== availabilityModalData._id));
                                     setAvailabilityModalData(null);
                                  } else {
                                     alert(data.message || "Failed to delete");
