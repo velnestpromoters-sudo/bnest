@@ -74,11 +74,9 @@ export default function HomeListPage() {
       {/* 1. TOP NAVBAR & 2. SEARCH BAR */}
       <div className="sticky top-0 z-50 bg-white px-4 pt-6 pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-[56px] h-[56px] rounded-full bg-[#F3F4F6] flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm border border-gray-200">
-              <img src="/logo.svg" alt="Homyvo" className="w-[85%] h-[85%] object-contain" />
-            </div>
-            <h1 className="text-[20px] font-bold text-[#111827] tracking-tight">Homyvo</h1>
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="Homyvo" className="w-[66px] h-[66px] shrink-0 object-contain drop-shadow-sm" />
+            <h1 className="text-[22px] font-black text-[#111827] tracking-tight -ml-1">Homyvo</h1>
           </div>
 
           {/* Top Right Controls */}
