@@ -14,22 +14,20 @@ app.use('/api/payment', paymentRoutes);
 
 // 3-Minute Render Free Tier Anti-Sleep Keep-Alive Ping (Dual Mode)
 const https = require('https');
+
+// Keep references to URLs to ping
+const PING_URLS = [
+  'https://bnest-backend-oz7c.onrender.com', // Backend
+  'https://homyvo.onrender.com',             // Frontend
+];
+
 setInterval(() => {
-  // 1. Keep Backend awake
-  https.get('https://bnest-backend-oz7c.onrender.com').on('error', (err) => {
-    console.log('Backend self-ping error:', err.message);
-  });
-  
-  // 2. Keep Frontend awake (dynamically uses env var)
-  const clientUrl = process.env.CLIENT_URL;
-  if (clientUrl && clientUrl !== 'http://localhost:3000') {
-    const reqModule = clientUrl.startsWith('https') ? https : http;
-    reqModule.get(clientUrl).on('error', (err) => {
-      console.log('Frontend ping error:', err.message);
+  PING_URLS.forEach(url => {
+    https.get(url).on('error', (err) => {
+      console.log(`Ping error for ${url}:`, err.message);
     });
-  }
-  
-  console.log('Fired anti-sleep heartbeat ping to Backend & Frontend');
+  });
+  console.log(`Fired anti-sleep heartbeat ping to ${PING_URLS.length} services`);
 }, 3 * 60 * 1000);
 
 const server = http.createServer(app);
