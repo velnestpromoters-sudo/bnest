@@ -2,7 +2,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { ArrowLeft, CheckCircle2, Circle, Truck, Key, Home, Handshake, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Truck, Key, Home, Handshake, MapPin, XCircle, AlertTriangle } from 'lucide-react';
 
 const STAGES = [
   { id: 'contact_unlocked', label: 'Contact Unlocked', icon: Key },
@@ -20,6 +20,7 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     const fetchTracking = async () => {
@@ -41,6 +42,7 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
 
   const handleUpdateStage = async (newStage: string) => {
      setUpdating(true);
+     setShowConfirmModal(false);
      try {
         const res = await fetch(`/api/interactions/${id}/stage`, {
            method: 'PUT',
@@ -138,11 +140,21 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
          </div>
 
          {/* Advanced Owner/Tenant Actions */}
-         <div className="mt-8 flex flex-col gap-3">
-            {currentStageIndex < STAGES.length - 1 ? (
+         <div className="mt-8 flex flex-col gap-3 relative z-10">
+            {data.interactionStage === 'rejected' ? (
+                <div className="w-full bg-red-50 border border-red-100 text-red-600 font-black py-4 rounded-2xl text-center shadow-inner text-sm mb-2 flex items-center justify-center gap-2">
+                   <XCircle className="w-5 h-5" /> Deal Rejected & Closed
+                </div>
+            ) : currentStageIndex < STAGES.length - 1 ? (
                <button 
                   disabled={updating}
-                  onClick={() => handleUpdateStage(STAGES[currentStageIndex + 1].id)}
+                  onClick={() => {
+                     if (STAGES[currentStageIndex + 1].id === 'finalized') {
+                        setShowConfirmModal(true);
+                     } else {
+                        handleUpdateStage(STAGES[currentStageIndex + 1].id);
+                     }
+                  }}
                   className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-black active:scale-95 transition-all text-sm mb-2"
                >
                   {updating ? 'Updating Pipeline...' : `Mark as "${STAGES[currentStageIndex + 1].label}"`}
@@ -160,6 +172,44 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
                Call {isOwner ? 'Tenant' : 'Owner'} Directly
             </button>
          </div>
+
+         {/* Conformation Popup */}
+         {showConfirmModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+               <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+                   <div className="flex justify-center mb-4">
+                      <div className="w-16 h-16 bg-blue-50 text-blue-500 flex items-center justify-center rounded-full border border-blue-100">
+                         <AlertTriangle className="w-8 h-8" />
+                      </div>
+                   </div>
+                   <h3 className="text-xl font-black text-center text-slate-900 mb-2">Finalize Deal</h3>
+                   <p className="text-center text-sm text-slate-500 mb-6 px-2 leading-relaxed">
+                      Please confirm if you successfully finalized renting this property. If rejected, the deal closes and the contact slot is freed.
+                   </p>
+                   
+                   <div className="flex flex-col gap-3">
+                       <button 
+                          onClick={() => handleUpdateStage('finalized')}
+                          className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+                       >
+                          <CheckCircle2 className="w-5 h-5" /> Yes, Deal Confirmed
+                       </button>
+                       <button 
+                          onClick={() => handleUpdateStage('rejected')}
+                          className="w-full py-3.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+                       >
+                          <XCircle className="w-5 h-5" /> No, Deal Rejected
+                       </button>
+                       <button 
+                          onClick={() => setShowConfirmModal(false)}
+                          className="w-full py-3 mt-1 text-slate-500 font-bold text-sm hover:text-slate-700 transition-colors"
+                       >
+                          Cancel
+                       </button>
+                   </div>
+               </div>
+            </div>
+         )}
       </div>
     </div>
   );

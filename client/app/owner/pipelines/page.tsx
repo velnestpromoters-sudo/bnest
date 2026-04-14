@@ -91,7 +91,12 @@ export default function OwnerPipelinesPage() {
                      
                      <div className="flex justify-between items-end w-full">
                          <div className="flex items-center gap-2">
-                             <img src={interaction.user?.profileImage || 'https://via.placeholder.com/150'} className="w-6 h-6 rounded-full object-cover border border-slate-200" alt="tenant" />
+                             <img 
+                                src={interaction.user?.profileImage || 'https://via.placeholder.com/150'} 
+                                onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(interaction.user?.name || 'User')}&background=random` }}
+                                className="w-6 h-6 rounded-full object-cover border border-slate-200" 
+                                alt="tenant" 
+                             />
                              <div>
                                 <p className="text-[11px] font-bold text-slate-800 leading-none mb-0.5">{interaction.user?.name}</p>
                                 <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest">{interaction.interactionStage?.replace("_", " ")}</p>

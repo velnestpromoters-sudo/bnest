@@ -79,14 +79,25 @@ exports.updateInteractionStage = async (req, res) => {
     const accessId = req.params.id;
     const { stage } = req.body;
     
-    // In a real app, verify that req.user is either the tenant or the property owner
+    const existingAccess = await Access.findById(accessId);
+    if (!existingAccess) return res.status(404).json({ success: false, message: 'Interaction not found.' });
+    
+    // Refund mechanism: Exclusively refund exactly 1 slot intrinsically if stage becomes explicitly rejected
+    if (stage === 'rejected' && existingAccess.interactionStage !== 'rejected') {
+        await Property.findByIdAndUpdate(existingAccess.property, {
+            $inc: { availableContactSlots: 1 }
+        });
+    }
+
     const access = await Access.findByIdAndUpdate(
        accessId, 
        { interactionStage: stage },
        { new: true }
-    );
-    
-    if (!access) return res.status(404).json({ success: false, message: 'Interaction not found.' });
+    ).populate({
+       path: 'property',
+       select: 'title location images rent propertyType ownerId availableContactSlots',
+       populate: { path: 'ownerId', select: 'name mobile' }
+    });
     
     res.status(200).json({ success: true, data: access });
   } catch (error) {
