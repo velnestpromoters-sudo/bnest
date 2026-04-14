@@ -108,6 +108,13 @@ export default function OwnerDashboard() {
                      <svg className="w-4 h-4 text-[#801786]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path></svg>
                      Add New Property
                   </button>
+                  <button 
+                     onClick={() => router.push('/owner/pipelines')}
+                     className="w-full text-left px-5 py-3 hover:bg-green-50 text-green-600 font-black text-sm transition-colors flex items-center gap-3"
+                  >
+                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                     Track Active Deals
+                  </button>
                   <div className="h-px bg-slate-100 mx-4 my-1" />
                   <button 
                      onClick={handleLogout}

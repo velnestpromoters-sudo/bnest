@@ -1,4 +1,26 @@
 const Access = require('../models/Access');
+const Property = require('../models/Property');
+
+// Fetch absolutely all interaction pipelines belonging specifically to this Owner's properties
+exports.getAllOwnerInteractions = async (req, res) => {
+  try {
+     // Fetch explicit Property IDs natively mapped to this user
+     const ownerProperties = await Property.find({ ownerId: req.user._id }).select('_id');
+     const propertyIds = ownerProperties.map(p => p._id);
+
+     const interactions = await Access.find({ property: { $in: propertyIds }, paymentStatus: 'paid' })
+        .populate({
+           path: 'property', 
+           select: 'title location rent images'
+        })
+        .populate('user', 'name email mobile profileImage')
+        .sort({ createdAt: -1 });
+        
+     res.status(200).json({ success: true, data: interactions });
+  } catch (error) {
+     res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // Get all properties a tenant has interacted with
 exports.getTenantInteractions = async (req, res) => {
