@@ -216,8 +216,15 @@ exports.updateAvailability = async (req, res) => {
              property.markModified('preferences');
           }
       }
-      
       // Handle unconditional Notes Updates if provided
+      if (req.body.tenantNotes !== undefined) {
+         property.tenantNotes = req.body.tenantNotes;
+      }
+
+      // Unconditionally update contact slots limiter via Quick Actions
+      if (req.body.availableContactSlots !== undefined) {
+         property.availableContactSlots = Math.max(0, Number(req.body.availableContactSlots));
+      }
       if (req.body.tenantNotes !== undefined) {
          property.tenantNotes = req.body.tenantNotes;
       }
@@ -281,7 +288,7 @@ exports.updateProperty = async (req, res) => {
       }
 
       // Merge native updates securely avoiding ownerId or coordinate overwrites directly unless isolated
-      const allowedUpdates = ['title', 'rent', 'deposit', 'bhkType', 'tenantNotes', 'amenities', 'furnishing', 'availability', 'availableFrom'];
+      const allowedUpdates = ['title', 'rent', 'deposit', 'bhkType', 'tenantNotes', 'amenities', 'furnishing', 'availability', 'availableFrom', 'availableContactSlots'];
       
       allowedUpdates.forEach(field => {
          if (req.body[field] !== undefined) {

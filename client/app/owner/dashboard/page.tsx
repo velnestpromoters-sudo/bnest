@@ -289,6 +289,12 @@ export default function OwnerDashboard() {
                         const notesArea = e.currentTarget.querySelector('textarea') as HTMLTextAreaElement;
                         payload.tenantNotes = notesArea.value;
 
+                        // Attach Available Contact Slots safely
+                        const slotsInput = e.currentTarget.querySelector('input[name="availableContactSlots"]') as HTMLInputElement;
+                        if (slotsInput) {
+                           payload.availableContactSlots = Number(slotsInput.value);
+                        }
+
                         const res = await fetch(`/api/properties/${availabilityModalData._id}/availability`, {
                            method: 'PUT',
                            headers: {
@@ -372,12 +378,27 @@ export default function OwnerDashboard() {
                      </div>
                   )}
 
-                  <div className="flex flex-col gap-1.5 mt-2">
-                     <p className="font-bold text-gray-800 text-sm">Notes for Tenants</p>
+                  <div className="flex flex-col gap-1.5 mt-4">
+                     <div className="flex justify-between items-center px-1">
+                        <p className="font-bold text-gray-800 text-sm">Available Contact Slots</p>
+                        <p className="text-xs text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">Scarcity Limit</p>
+                     </div>
+                     <input 
+                        type="number"
+                        name="availableContactSlots"
+                        defaultValue={availabilityModalData.availableContactSlots ?? 4}
+                        min={0}
+                        className="w-full border-2 border-gray-100 p-3 rounded-xl bg-white focus:outline-none focus:border-[#801786] text-sm text-gray-700 font-bold"
+                     />
+                     <p className="text-[10px] text-gray-400 px-1 mt-0.5 leading-tight tracking-tight">Controls exactly how many more tenants can aggressively pay to unlock your contact details before the property dynamically locks them out.</p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 mt-4">
+                     <p className="font-bold text-gray-800 text-sm px-1">Notes for Tenants</p>
                      <textarea 
                         rows={3} 
                         defaultValue={availabilityModalData.tenantNotes}
-                        className="w-full border p-3 rounded-xl bg-white focus:outline-none focus:border-[#801786] text-sm text-gray-700" 
+                        className="w-full border-2 border-gray-100 p-3 rounded-xl bg-white focus:outline-none focus:border-[#801786] text-sm text-gray-700" 
                         placeholder="e.g. Vegetarian only, quiet hours..." 
                         style={{ resize: 'none' }}
                      />

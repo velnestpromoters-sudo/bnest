@@ -256,14 +256,32 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     <div className="bg-white px-6 py-5 rounded-2xl shadow-xl border border-purple-100 flex flex-col items-center text-center max-w-[280px]">
                       <Lock className="w-8 h-8 text-[#801786] mb-2" />
                       <p className="font-black text-slate-900 mb-1 text-base">Details Hidden</p>
-                      <p className="text-xs text-slate-500 mb-4 px-2 tracking-tight">Pay to instantly unlock the exact address, maps, and direct phone number.</p>
-                      <button 
-                         onClick={handleUnlockPayment}
-                         disabled={isProcessingPayment} 
-                         className="px-8 py-3 bg-[#801786] text-white font-black tracking-wide rounded-xl text-sm shadow-lg active:scale-95 transition-all w-full flex justify-center items-center gap-2"
-                      >
-                         {isProcessingPayment ? "Processing..." : "Unlock for ₹49"}
-                      </button>
+                      
+                      {property.availableContactSlots === 0 ? (
+                         <>
+                            <p className="text-xs text-red-500 font-bold mb-4 px-2 tracking-tight">Property Viewing Full! No contact slots remain.</p>
+                            <button 
+                               disabled 
+                               className="px-8 py-3 bg-gray-200 text-gray-500 font-black tracking-wide rounded-xl text-sm shadow-inner w-full flex justify-center items-center cursor-not-allowed"
+                            >
+                               Slots Filled
+                            </button>
+                         </>
+                      ) : (
+                         <>
+                            <p className="text-xs text-slate-500 mb-2 px-2 tracking-tight">Pay to instantly unlock the exact address, maps, and direct phone number.</p>
+                            <span className="text-[10px] font-bold text-[#ec38b7] uppercase tracking-widest bg-pink-50 border border-pink-100 rounded-full px-2 py-0.5 mb-3 animate-pulse">
+                               Only {property.availableContactSlots} slots remain
+                            </span>
+                            <button 
+                               onClick={handleUnlockPayment}
+                               disabled={isProcessingPayment} 
+                               className="px-8 py-3 bg-[#801786] text-white font-black tracking-wide rounded-xl text-sm shadow-lg active:scale-95 transition-all w-full flex justify-center items-center gap-2"
+                            >
+                               {isProcessingPayment ? "Processing..." : "Unlock for ₹49"}
+                            </button>
+                         </>
+                      )}
                     </div>
                   </div>
               )}

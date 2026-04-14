@@ -9,27 +9,46 @@ export default function WishlistPage() {
   const router = useRouter();
   const { wishlist, removeFromWishlist } = useWishlistStore();
 
+  const [interactions, setInteractions] = React.useState<any[]>([]);
+
   useEffect(() => {
     const validateWishlistItems = async () => {
-       if (wishlist.length === 0) return;
-       
-       const ids = wishlist.map(w => w._id);
-       try {
-          const res = await fetch('/api/properties/validate-wishlist', {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ ids })
-          });
-          const data = await res.json();
-          if (data.success) {
-             const activeIds = data.activeIds;
-             ids.forEach(id => {
-                if (!activeIds.includes(id)) {
-                   removeFromWishlist(id);
-                }
+       // Validate Wishlist & Fetch Access Interactions sequentially
+       if (wishlist.length > 0) {
+          const ids = wishlist.map(w => w._id);
+          try {
+             const res = await fetch('/api/properties/validate-wishlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids })
              });
+             const data = await res.json();
+             if (data.success) {
+                const activeIds = data.activeIds;
+                ids.forEach(id => {
+                   if (!activeIds.includes(id)) {
+                      removeFromWishlist(id);
+                   }
+                });
+             }
+          } catch (err) { console.error("Wishlist sync error:", err); }
+       }
+       
+       // Now Fetch Tracking Accesses seamlessly
+       try {
+          const token = useAuthStore.getState().token;
+          if (token) {
+             const trackRes = await fetch('/api/interactions/tenant/my-interactions', {
+                headers: { 'Authorization': `Bearer ${token}` }
+             });
+             const trackData = await trackRes.json();
+             if (trackData.success) {
+                setInteractions(trackData.data);
+             }
           }
-       } catch (err) { console.error("Wishlist sync error:", err); }
+       } catch (e) {
+          console.error("Failed to load pipeline tracking", e);
+       }
     };
     
     validateWishlistItems();
@@ -54,10 +73,42 @@ export default function WishlistPage() {
         </span>
       </div>
 
+      {/* Active Deal Pipelines / Unlocked Interactions */}
+      {interactions.length > 0 && (
+         <div className="pt-6 px-4 pb-2">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2 mb-4">
+               <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+               Active Tracking Pipelines
+            </h2>
+            <div className="flex flex-col gap-3">
+               {interactions.map(interaction => (
+                  <div key={interaction._id} className="bg-white border-2 border-indigo-50 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+                     <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                        <img src={interaction.property?.images?.[0] || 'https://via.placeholder.com/150'} alt="prop" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                        <div className="flex flex-col">
+                           <h3 className="font-bold text-slate-800 text-sm line-clamp-1">{interaction.property?.title}</h3>
+                           <p className="text-xs text-slate-500 line-clamp-1">{interaction.property?.location?.area}</p>
+                           <p className="text-[10px] font-bold text-indigo-500 uppercase mt-1">Stage: {interaction.interactionStage?.replace('_', ' ')}</p>
+                        </div>
+                     </div>
+                     <button 
+                        onClick={() => router.push(`/tracking/${interaction._id}`)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md active:scale-95 whitespace-nowrap"
+                     >
+                        Track Status
+                     </button>
+                  </div>
+               ))}
+            </div>
+            
+            <div className="h-px bg-slate-200 my-6 mx-4"></div>
+         </div>
+      )}
+
       {/* Grid Layout */}
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {wishlist.length === 0 ? (
-          <div className="col-span-full mt-24 flex flex-col items-center justify-center text-center px-6">
+          <div className="col-span-full mt-10 flex flex-col items-center justify-center text-center px-6">
              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5 shadow-inner">
                <Heart className="w-8 h-8 text-gray-400 fill-gray-200" />
              </div>

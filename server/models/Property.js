@@ -46,6 +46,7 @@ const propertySchema = new mongoose.Schema({
     bachelorAllowed: Boolean,
     maxOccupants: Number
   },
+  availableContactSlots: { type: Number, default: 4 },
   uniqueViewers: [{ type: String }]
 }, { timestamps: true });
 

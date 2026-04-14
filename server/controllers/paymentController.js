@@ -76,6 +76,12 @@ exports.verifyAccessPayment = async (req, res) => {
       user: userId,
       property: propertyId,
       paymentStatus: "paid",
+      interactionStage: "contact_unlocked"
+    });
+
+    // Enforce limits by automatically burning a slot dynamically
+    await Property.findByIdAndUpdate(propertyId, {
+      $inc: { availableContactSlots: -1 }
     });
 
     res.json({ success: true });

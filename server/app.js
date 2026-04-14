@@ -19,10 +19,13 @@ app.get('/', (req, res) => {
   res.status(200).send('<h2>Bnest API Backend is Live & Running!</h2><p>Base endpoints: /api/auth, /api/properties, /health</p>');
 });
 
+const interactionRoutes = require('./routes/interactionRoutes');
+
 app.use('/health', healthRoute);
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/interactions', interactionRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

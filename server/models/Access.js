@@ -8,6 +8,11 @@ const accessSchema = new mongoose.Schema({
     enum: ["pending", "paid"],
     default: "paid",
   },
+  interactionStage: {
+    type: String,
+    enum: ['contact_unlocked', 'visited', 'negotiating', 'finalized'],
+    default: 'contact_unlocked'
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Access', accessSchema);
