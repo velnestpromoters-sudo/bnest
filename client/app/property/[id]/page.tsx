@@ -229,7 +229,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               <div className={access === 'limited' && !paymentUnlocked ? "blur-[6px] pointer-events-none select-none transition-all duration-500 space-y-4" : "transition-all duration-500 space-y-4"}>
                 
                 {/* Core Property Details Extracted */}
-                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 grid grid-cols-2 gap-y-4 gap-x-2">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 grid grid-cols-2 gap-y-5 gap-x-3">
                    <div>
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">BHK Type</p>
                       <p className="font-bold text-slate-800 text-sm">{property.bhkType || 'BHK Unavailable'}</p>
@@ -237,6 +237,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                    <div>
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Bachelors</p>
                       <p className="font-bold text-slate-800 text-sm">{property.preferences?.bachelorAllowed ? 'Allowed' : 'Not Allowed'}</p>
+                   </div>
+                   <div>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Furnishing</p>
+                      <p className="font-bold text-slate-800 text-sm capitalize">{property.furnishing || 'None'}</p>
+                   </div>
+                   <div>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Availability</p>
+                      <p className="font-bold text-slate-800 text-sm capitalize">{property.availability?.replace('_', ' ') || 'Immediate'}</p>
                    </div>
                    <div className="col-span-2 mt-1">
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Exact Address</p>
