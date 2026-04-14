@@ -6,6 +6,8 @@ export interface User {
   name?: string;
   email?: string;
   mobile?: string;
+  gender?: string;
+  profileImage?: string;
   role: 'tenant' | 'owner';
   isVerified?: boolean;
 }
