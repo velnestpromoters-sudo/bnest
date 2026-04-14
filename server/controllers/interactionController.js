@@ -16,7 +16,9 @@ exports.getAllOwnerInteractions = async (req, res) => {
         .populate('user', 'name email mobile profileImage')
         .sort({ createdAt: -1 });
         
-     res.status(200).json({ success: true, data: interactions });
+     const validInteractions = interactions.filter(i => i.property !== null);
+        
+     res.status(200).json({ success: true, data: validInteractions });
   } catch (error) {
      res.status(500).json({ success: false, message: error.message });
   }
@@ -32,7 +34,10 @@ exports.getTenantInteractions = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, data: interactions });
+    // Filter out instances where the property document has been entirely deleted by owner
+    const validInteractions = interactions.filter(i => i.property !== null);
+
+    res.status(200).json({ success: true, data: validInteractions });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
