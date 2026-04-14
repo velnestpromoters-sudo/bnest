@@ -7,11 +7,11 @@ const { upload } = require('../middleware/upload');
 
 router.get('/search', searchController.searchProperties);
 router.get('/owner-analytics', protect, propertyController.getOwnerAnalytics); // Strictly restricted to Verified Owners mapping dynamic growth data natively
+router.get('/my-listings', protect, propertyController.getMyListings); // Placed above /:id to prevent shadowing
 router.get('/:id', checkTenantAuth, propertyController.getProperty);
 router.get('/', propertyController.getAllProperties); // general list
 router.post('/:id/view', checkTenantAuth, propertyController.registerView); // Registers global traffic gracefully bypassing explicit blocks for guests
 
-router.get('/my-listings', protect, propertyController.getMyListings);
 router.post('/validate-wishlist', propertyController.validateWishlist);
 router.put('/:id/toggle-status', protect, propertyController.togglePropertyStatus);
 
