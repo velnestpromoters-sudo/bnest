@@ -335,10 +335,10 @@ exports.validateWishlist = async (req, res) => {
     }
     
     // Aggregate strictly the active IDs natively mapped against the user's local array
-    const activeProperties = await Property.find({ _id: { $in: ids }, isActive: true }).select('_id');
+    const activeProperties = await Property.find({ _id: { $in: ids }, isActive: true }).lean();
     const activeIds = activeProperties.map(p => p._id.toString());
     
-    res.json({ success: true, activeIds });
+    res.json({ success: true, activeIds, populatedProperties: activeProperties });
   } catch (error) {
     console.error("Wishlist Validation Error:", error);
     res.status(500).json({ success: false, message: "Failed to validate wishlist." });

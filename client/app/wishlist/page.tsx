@@ -19,6 +19,9 @@ export default function WishlistPage() {
   const [recLoading, setRecLoading] = useState(false);
   const [recFilter, setRecFilter] = useState('best_match');
 
+  const [savedSortMode, setSavedSortMode] = useState<string>('none');
+  const [detailedWishlist, setDetailedWishlist] = useState<any[]>([]);
+
   useEffect(() => {
     const validateWishlistItems = async () => {
        // Validate Wishlist & Fetch Access Interactions sequentially
@@ -33,6 +36,12 @@ export default function WishlistPage() {
              const data = await res.json();
              if (data.success) {
                 const activeIds = data.activeIds;
+                
+                // Map the full property pipelines into state for local heuristic sorting
+                if (data.populatedProperties) {
+                   setDetailedWishlist(data.populatedProperties);
+                }
+
                 ids.forEach(id => {
                    if (!activeIds.includes(id)) {
                       removeFromWishlist(id);
@@ -93,6 +102,44 @@ export default function WishlistPage() {
      
   }, [recFilter, wishlist.length, coordinates]);
 
+  // Distance helper
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+    const p = 0.017453292519943295;
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p)/2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))/2;
+    return 12742 * Math.asin(Math.sqrt(a)); 
+  };
+
+  const displayWishlist = React.useMemo(() => {
+     if (detailedWishlist.length === 0) return wishlist;
+     
+     let sorted = [...detailedWishlist];
+     if (savedSortMode === 'price_low') {
+        sorted.sort((a, b) => (a.rent || 0) - (b.rent || 0));
+     } else if (savedSortMode === 'amenities') {
+        sorted.sort((a, b) => (b.amenities?.length || 0) - (a.amenities?.length || 0));
+     } else if (savedSortMode === 'furnished') {
+        sorted.sort((a, b) => (b.furnishing === 'full' ? -1 : 1) - (a.furnishing === 'full' ? -1 : 1));
+     } else if (savedSortMode === 'checkin') {
+        sorted.sort((a, b) => (b.availability === 'immediate' ? -1 : 1) - (a.availability === 'immediate' ? -1 : 1));
+     } else if (savedSortMode === 'nearest' && coordinates?.lat) {
+        sorted.sort((a, b) => {
+           const distA = a.location?.coordinates?.length === 2 ? getDistance(coordinates.lat, coordinates.lng, a.location.coordinates[1], a.location.coordinates[0]) : Infinity;
+           const distB = b.location?.coordinates?.length === 2 ? getDistance(coordinates.lat, coordinates.lng, b.location.coordinates[1], b.location.coordinates[0]) : Infinity;
+           return distA - distB;
+        });
+     }
+     
+     return sorted.map(s => ({
+        _id: s._id,
+        title: s.title,
+        price: s.rent,
+        typeStr: s.bhkType ? `${s.bhkType} • ${s.propertyType}` : s.propertyType,
+        img: s.images?.[0] || 'https://via.placeholder.com/300'
+     }));
+  }, [detailedWishlist, savedSortMode, coordinates, wishlist]);
+
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] pb-24 font-sans text-gray-900 overflow-x-hidden">
       {/* Header */}
@@ -143,9 +190,42 @@ export default function WishlistPage() {
          </div>
       )}
 
+      {/* Saved Properties Sorting Engine */}
+      {wishlist.length > 0 && (
+         <div className="px-4 mt-2 mb-2">
+            <h3 className="text-sm font-bold text-slate-500 mb-2 px-1">Sort Your Collection</h3>
+            <div className="flex overflow-x-auto gap-2 pb-2 no-scrollbar scroll-smooth snap-x">
+               {[
+                  { id: 'none', label: 'Default', icon: Heart },
+                  { id: 'price_low', label: 'Price: Low to High', icon: DollarSign },
+                  { id: 'nearest', label: 'Nearest to Me', icon: MapPin },
+                  { id: 'amenities', label: 'Most Amenities', icon: CheckCircle2 },
+                  { id: 'furnished', label: 'Fully Furnished', icon: BedDouble },
+                  { id: 'checkin', label: 'Fast Check-in', icon: Key }
+               ].map(filter => {
+                  const Icon = filter.icon;
+                  const isActive = savedSortMode === filter.id;
+                  return (
+                     <button 
+                        key={filter.id}
+                        onClick={() => setSavedSortMode(filter.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 shrink-0 rounded-xl font-bold text-[11px] tracking-wide transition-all border snap-start ${
+                           isActive ? 'bg-slate-800 text-white border-slate-800 shadow-md' 
+                                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                        }`}
+                     >
+                        <Icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        {filter.label}
+                     </button>
+                  )
+               })}
+            </div>
+         </div>
+      )}
+
       {/* Grid Layout */}
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {wishlist.length === 0 ? (
+        {displayWishlist.length === 0 ? (
           <div className="col-span-full mt-10 flex flex-col items-center justify-center text-center px-6">
              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5 shadow-inner">
                <Heart className="w-8 h-8 text-gray-400 fill-gray-200" />
@@ -162,7 +242,7 @@ export default function WishlistPage() {
              </button>
           </div>
         ) : (
-          wishlist.map(item => (
+          displayWishlist.map(item => (
             <div 
               key={item._id} 
               className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-gray-200/60 p-4 flex gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] duration-200 relative group" 
