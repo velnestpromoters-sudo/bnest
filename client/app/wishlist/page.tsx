@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Heart, Search, Sparkles, MapPin, DollarSign, Key, BedDouble } from 'lucide-react';
+import { ChevronLeft, Heart, Search, Sparkles, MapPin, DollarSign, Key, BedDouble, CheckCircle2 } from 'lucide-react';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useAuthStore } from '@/store/authStore';
 import { useLocationStore } from '@/store/locationStore';
