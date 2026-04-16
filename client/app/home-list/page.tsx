@@ -74,7 +74,10 @@ export default function HomeListPage() {
       
       <div className="sticky top-0 z-50 bg-white px-4 pt-6 pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-0">
+          <div 
+             onClick={() => router.push('/about')}
+             className="flex items-center gap-0 cursor-pointer active:scale-95 transition-transform"
+          >
             <img src="/logo.svg" alt="Homyvo" className="w-[84px] h-[84px] shrink-0 object-contain drop-shadow-md" />
             <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4">Homyvo</h1>
           </div>
