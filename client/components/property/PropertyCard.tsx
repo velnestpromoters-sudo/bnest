@@ -3,11 +3,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { MapPin, CheckCircle, ShieldCheck } from 'lucide-react';
+import { MapPin, CheckCircle, ShieldCheck, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useWishlistStore } from '@/store/wishlistStore';
 
 interface PropertyCardProps {
   id: string | number;
+  title?: string;
+  bhkType?: string;
+  propertyType?: string;
   image: string;
   rent: number;
   location: string;
@@ -15,8 +19,9 @@ interface PropertyCardProps {
   moveInStatus?: string;
 }
 
-export function PropertyCard({ id, image, rent, location, matchScore, moveInStatus }: PropertyCardProps) {
+export function PropertyCard({ id, title = 'Property', bhkType, propertyType, image, rent, location, matchScore, moveInStatus }: PropertyCardProps) {
   const router = useRouter();
+  const { wishlist, removeFromWishlist, addToWishlist } = useWishlistStore();
 
   return (
     <motion.div
@@ -30,9 +35,30 @@ export function PropertyCard({ id, image, rent, location, matchScore, moveInStat
         <div className="relative h-56 w-full bg-slate-100">
           <img src={image} alt={location} className="object-cover w-full h-full rounded-t-[24px]" />
           
+          <button 
+             onClick={(e) => {
+                e.stopPropagation();
+                const isSaved = wishlist.some(w => w._id === id);
+                if (isSaved) {
+                   removeFromWishlist(id as string);
+                } else {
+                   addToWishlist({
+                       _id: id as string,
+                       title: title,
+                       price: rent,
+                       typeStr: bhkType ? `${bhkType} • ${propertyType}` : (propertyType || 'Property'),
+                       img: image
+                   });
+                }
+             }}
+             className="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-gray-100 flex items-center justify-center hover:bg-white active:scale-90 transition-transform z-10"
+          >
+             <Heart className={`w-4 h-4 ${wishlist.some(w => w._id === id) ? 'fill-[#ec38b7] text-[#ec38b7]' : 'text-slate-400'}`} />
+          </button>
+
           {/* Match Score Badge */}
           {matchScore && (
-            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold text-emerald-600 shadow-sm flex items-center gap-1">
+            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold text-[#801786] shadow-[0_5px_15px_-5px_rgba(128,23,134,0.3)] border border-purple-100 uppercase tracking-wider flex items-center gap-1">
               {matchScore}% Match
             </div>
           )}
