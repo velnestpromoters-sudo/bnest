@@ -91,7 +91,7 @@ export default function AboutPage() {
            className="absolute flex flex-col items-center justify-center w-full"
            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
         >
-           <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-purple-600 mb-4 drop-shadow-[0_0_40px_rgba(128,23,134,0.3)]">
+           <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#7B8AF3] to-[#C84EFE] mb-4 drop-shadow-[0_0_40px_rgba(200,78,254,0.3)]">
               Homyvo
            </h1>
            <p className="text-xl md:text-2xl font-semibold text-slate-300 tracking-tight">
