@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Instagram, Phone, Mail, ShieldCheck, Clock, MapPin } from 'lucide-react';
+import { ChevronLeft, AtSign, Phone, Mail, ShieldCheck, Clock, MapPin } from 'lucide-react';
 
 export default function AboutPage() {
   const router = useRouter();
@@ -243,7 +243,7 @@ export default function AboutPage() {
               
               <div className="flex flex-col items-center justify-center gap-4 w-full max-w-sm mb-12">
                  <a href="#" className="flex items-center gap-3 text-[#D1D5DB] hover:text-white transition-colors w-full bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 active:scale-95">
-                    <Instagram className="w-5 h-5 text-purple-400" />
+                    <AtSign className="w-5 h-5 text-purple-400" />
                     <span className="font-semibold tracking-wide">@homyvo</span>
                  </a>
                  <a href="#" className="flex items-center gap-3 text-[#D1D5DB] hover:text-white transition-colors w-full bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 active:scale-95">
