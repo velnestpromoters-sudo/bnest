@@ -9,7 +9,7 @@ import { useLocationStore } from '@/store/locationStore';
 
 export default function WishlistPage() {
   const router = useRouter();
-  const { wishlist, removeFromWishlist } = useWishlistStore();
+  const { wishlist, removeFromWishlist, addToWishlist } = useWishlistStore();
   const { coordinates } = useLocationStore();
 
   const [interactions, setInteractions] = useState<any[]>([]);
@@ -352,6 +352,27 @@ export default function WishlistPage() {
                               Recommended
                            </div>
                         )}
+                        
+                        <button 
+                           onClick={(e) => {
+                              e.stopPropagation();
+                              const isSaved = wishlist.some(w => w._id === prop._id);
+                              if (isSaved) {
+                                 removeFromWishlist(prop._id);
+                              } else {
+                                 addToWishlist({
+                                     _id: prop._id,
+                                     title: prop.title,
+                                     price: prop.rent,
+                                     typeStr: prop.bhkType ? `${prop.bhkType} • ${prop.propertyType}` : prop.propertyType,
+                                     img: prop.images?.[0] || 'https://via.placeholder.com/300'
+                                 });
+                              }
+                           }}
+                           className="absolute top-2 left-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-gray-100 flex items-center justify-center hover:bg-white active:scale-90 transition-transform"
+                        >
+                           <Heart className={`w-4 h-4 ${wishlist.some(w => w._id === prop._id) ? 'fill-[#ec38b7] text-[#ec38b7]' : 'text-slate-400'}`} />
+                        </button>
                      </div>
                      <h3 className="font-extrabold text-slate-800 text-base leading-tight mb-1 truncate">{prop.title}</h3>
                      <p className="text-[11px] font-bold text-slate-400 mb-3 truncate flex items-center gap-1">
