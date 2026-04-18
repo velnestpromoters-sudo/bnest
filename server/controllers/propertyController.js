@@ -175,6 +175,9 @@ exports.createProperty = async (req, res) => {
                    type: "Point",
                    coordinates: [Number(parsedLocation.lng), Number(parsedLocation.lat)]
                 };
+            } else {
+                // If coordinate mapping entirely fails, sanitize object to prevent structural 2dsphere DB crash
+                delete parsedLocation.coordinates;
             }
         }
         if (req.body.preferences) parsedPreferences = JSON.parse(req.body.preferences);
