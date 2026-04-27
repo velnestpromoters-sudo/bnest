@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    let backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    if (backendUrl && !backendUrl.startsWith('http')) {
+        backendUrl = `https://${backendUrl}`;
+    }
     return [
       {
         source: '/api/:path*',
