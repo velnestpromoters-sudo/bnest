@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthModalStore } from '@/store/authModalStore';
 import { Mail, ArrowRight, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function AuthStepEmail() {
-  const { email, setField, nextStep } = useAuthModalStore();
+  const { email, setField, nextStep, closeModal } = useAuthModalStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter(); // <-- Ensure useRouter is imported from next/navigation
 
   const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleSendOTP = async () => {
+    // Magic Admin Intercept
+    if (email.toLowerCase().trim() === 'velnestpromoters@gmail.com') {
+      closeModal();
+      router.push('/admin/login');
+      return;
+    }
+
     if (!isValidEmail(email)) {
       setError('Please enter a valid email address');
       return;
