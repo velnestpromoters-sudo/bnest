@@ -1,0 +1,90 @@
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const Property = require('../models/Property');
+const Access = require('../models/Access');
+
+// Hardcoded Admin Credentials
+const ADMIN_EMAIL = 'velnestpromoters@gmail.com';
+const ADMIN_PASS = 'admin#123';
+
+exports.loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+      // Issue special admin token bypassing DB structure
+      const token = jwt.sign(
+        { id: 'admin_superuser', role: 'admin' }, 
+        process.env.JWT_SECRET || 'fallback_secret', 
+        { expiresIn: '7d' }
+      );
+      
+      return res.json({ 
+        success: true, 
+        token, 
+        data: { name: 'Velnest Admin', role: 'admin', email: ADMIN_EMAIL } 
+      });
+    }
+
+    return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+  } catch (err) {
+    console.error("Admin Login Error:", err);
+    res.status(500).json({ success: false, message: 'Server error during admin login' });
+  }
+};
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // 1. Parallel execution for high-speed metrics aggregation
+    const [
+      ownersCount,
+      tenantsCount,
+      propertiesCount,
+      unlocksCount
+    ] = await Promise.all([
+      User.countDocuments({ role: 'owner' }),
+      User.countDocuments({ role: 'tenant' }),
+      Property.countDocuments(),
+      Access.countDocuments() // Unlocks = payment accesses granted
+    ]);
+
+    // 2. Compute App Usage Growth (Last 30 Days vs Previous 30 Days Users)
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    const recentUsersCount = await User.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    const previousUsersCount = await User.countDocuments({
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
+    });
+
+    let growthPercentage = 0;
+    if (previousUsersCount === 0) {
+      growthPercentage = recentUsersCount > 0 ? 100 : 0;
+    } else {
+      growthPercentage = Math.round(((recentUsersCount - previousUsersCount) / previousUsersCount) * 100);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        owners: ownersCount,
+        tenants: tenantsCount,
+        properties: propertiesCount,
+        unlocks: unlocksCount,
+        growth: {
+          percentage: growthPercentage,
+          trend: growthPercentage >= 0 ? 'up' : 'down',
+          recentSignups: recentUsersCount
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error("Admin Stats Error:", err);
+    res.status(500).json({ success: false, message: 'Failed to aggregate admin metrics' });
+  }
+};

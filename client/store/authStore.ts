@@ -8,7 +8,7 @@ export interface User {
   mobile?: string;
   gender?: string;
   profileImage?: string;
-  role: 'tenant' | 'owner';
+  role: 'tenant' | 'owner' | 'admin';
   isVerified?: boolean;
 }
 
