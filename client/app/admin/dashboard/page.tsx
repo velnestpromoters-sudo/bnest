@@ -7,10 +7,21 @@ import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { Users, Home, Key, TrendingUp, TrendingDown, LogOut, Loader2, ShieldCheck, UserCircle2 } from 'lucide-react';
 
+interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  createdAt: string;
+}
+
 interface AdminStats {
-  owners: number;
-  tenants: number;
-  properties: number;
+  owners: AdminUser[];
+  tenants: AdminUser[];
+  properties: {
+    total: number;
+    active: number;
+  };
   unlocks: number;
   growth: {
     percentage: number;
@@ -26,6 +37,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Modal state
+  const [modalData, setModalData] = useState<{title: string, users: AdminUser[]} | null>(null);
 
   useEffect(() => {
     if (!token || user?.role !== 'admin') {
@@ -85,10 +99,39 @@ export default function AdminDashboard() {
   }
 
   const cards = [
-    { title: 'Total Owners', value: stats.owners, icon: <UserCircle2 className="w-6 h-6" />, color: 'from-blue-500 to-indigo-500', shadow: 'shadow-blue-500/20' },
-    { title: 'Total Tenants', value: stats.tenants, icon: <Users className="w-6 h-6" />, color: 'from-fuchsia-500 to-pink-500', shadow: 'shadow-fuchsia-500/20' },
-    { title: 'Total Properties', value: stats.properties, icon: <Home className="w-6 h-6" />, color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-500/20' },
-    { title: 'Total Unlocks', value: stats.unlocks, icon: <Key className="w-6 h-6" />, color: 'from-amber-400 to-orange-500', shadow: 'shadow-orange-500/20' },
+    { 
+      title: 'Total Owners', 
+      value: stats.owners.length, 
+      icon: <UserCircle2 className="w-6 h-6" />, 
+      color: 'from-blue-500 to-indigo-500', 
+      shadow: 'shadow-blue-500/20',
+      onClick: () => setModalData({ title: 'Platform Owners', users: stats.owners })
+    },
+    { 
+      title: 'Total Tenants', 
+      value: stats.tenants.length, 
+      icon: <Users className="w-6 h-6" />, 
+      color: 'from-fuchsia-500 to-pink-500', 
+      shadow: 'shadow-fuchsia-500/20',
+      onClick: () => setModalData({ title: 'Platform Tenants', users: stats.tenants })
+    },
+    { 
+      title: 'Active Properties', 
+      value: stats.properties.active, 
+      subtitle: `${stats.properties.total} Total (Including Drafts)`,
+      icon: <Home className="w-6 h-6" />, 
+      color: 'from-emerald-400 to-teal-500', 
+      shadow: 'shadow-emerald-500/20',
+      onClick: null
+    },
+    { 
+      title: 'Total Unlocks', 
+      value: stats.unlocks, 
+      icon: <Key className="w-6 h-6" />, 
+      color: 'from-amber-400 to-orange-500', 
+      shadow: 'shadow-orange-500/20',
+      onClick: null
+    },
   ];
 
   return (
@@ -116,7 +159,7 @@ export default function AdminDashboard() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
         
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -135,7 +178,8 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              className={`bg-slate-900/40 border border-white/5 p-6 rounded-2xl relative overflow-hidden group`}
+              onClick={card.onClick || undefined}
+              className={`bg-slate-900/40 border border-white/5 p-6 rounded-2xl relative overflow-hidden group ${card.onClick ? 'cursor-pointer hover:bg-slate-900/60 transition-colors' : ''}`}
             >
               {/* Glow Effect */}
               <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${card.color} opacity-10 blur-3xl rounded-full group-hover:opacity-20 transition-opacity`} />
@@ -150,6 +194,9 @@ export default function AdminDashboard() {
               <div className="text-4xl font-bold text-white tracking-tight">
                  {card.value.toLocaleString()}
               </div>
+              {card.subtitle && (
+                 <div className="text-xs text-slate-500 mt-2 font-medium">{card.subtitle}</div>
+              )}
             </motion.div>
           ))}
         </div>
@@ -196,6 +243,44 @@ export default function AdminDashboard() {
               </div>
            </div>
         </motion.div>
+        
+        {/* User Modal Viewer */}
+        {modalData && (
+           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <motion.div 
+                 initial={{ opacity: 0, scale: 0.95 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 className="bg-[#0f0f13] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl"
+              >
+                 <div className="p-6 border-b border-white/5 flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-white">{modalData.title}</h2>
+                    <button onClick={() => setModalData(null)} className="text-slate-400 hover:text-white transition-colors">
+                       ✕
+                    </button>
+                 </div>
+                 <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                    {modalData.users.length === 0 ? (
+                       <p className="text-slate-500 text-center py-10">No users found.</p>
+                    ) : (
+                       <div className="space-y-3">
+                          {modalData.users.map((u, idx) => (
+                             <div key={u._id || idx} className="bg-white/5 border border-white/5 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <div>
+                                   <div className="text-white font-medium">{u.name || 'Unnamed User'}</div>
+                                   <div className="text-slate-400 text-xs">{u.email || 'No email provided'}</div>
+                                </div>
+                                <div className="text-right">
+                                   <div className="text-indigo-400 text-sm font-medium">{u.mobile || 'No Phone'}</div>
+                                   <div className="text-slate-500 text-[10px] mt-1 uppercase tracking-wider">Joined {new Date(u.createdAt).toLocaleDateString()}</div>
+                                </div>
+                             </div>
+                          ))}
+                       </div>
+                    )}
+                 </div>
+              </motion.div>
+           </div>
+        )}
 
       </main>
     </div>

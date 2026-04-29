@@ -37,14 +37,16 @@ exports.getDashboardStats = async (req, res) => {
   try {
     // 1. Parallel execution for high-speed metrics aggregation
     const [
-      ownersCount,
-      tenantsCount,
-      propertiesCount,
+      owners,
+      tenants,
+      totalPropertiesCount,
+      activePropertiesCount,
       unlocksCount
     ] = await Promise.all([
-      User.countDocuments({ role: 'owner' }),
-      User.countDocuments({ role: 'tenant' }),
+      User.find({ role: 'owner' }).select('name email mobile createdAt').sort({ createdAt: -1 }),
+      User.find({ role: 'tenant' }).select('name email mobile createdAt').sort({ createdAt: -1 }),
       Property.countDocuments(),
+      Property.countDocuments({ isVerified: true }), // Only paid/active properties
       Access.countDocuments() // Unlocks = payment accesses granted
     ]);
 
@@ -71,9 +73,12 @@ exports.getDashboardStats = async (req, res) => {
     res.json({
       success: true,
       data: {
-        owners: ownersCount,
-        tenants: tenantsCount,
-        properties: propertiesCount,
+        owners: owners, // Full array of owners
+        tenants: tenants, // Full array of tenants
+        properties: {
+           total: totalPropertiesCount,
+           active: activePropertiesCount
+        },
         unlocks: unlocksCount,
         growth: {
           percentage: growthPercentage,
