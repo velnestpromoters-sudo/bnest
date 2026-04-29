@@ -46,7 +46,7 @@ exports.getDashboardStats = async (req, res) => {
       User.find({ role: 'owner' }).select('name email mobile createdAt').sort({ createdAt: -1 }),
       User.find({ role: 'tenant' }).select('name email mobile createdAt').sort({ createdAt: -1 }),
       Property.countDocuments(),
-      Property.countDocuments({ isVerified: true }), // Only paid/active properties
+      Property.countDocuments({ isActive: true }), // Only paid/active properties
       Access.countDocuments() // Unlocks = payment accesses granted
     ]);
 
