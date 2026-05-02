@@ -13,6 +13,24 @@ import { useAuthModalStore } from '@/store/authModalStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import api from '@/lib/api';
 
+const slides = [
+  {
+    title: "Find your perfect stay",
+    subtitle: "Discover student-friendly apartments and family homes",
+    bgClass: "from-[#b22394] to-[#1819a8]"
+  },
+  {
+    title: "List your property today",
+    subtitle: "Connect with verified tenants securely and instantly",
+    bgClass: "from-indigo-600 to-cyan-600"
+  },
+  {
+    title: "Zero Brokerage platform",
+    subtitle: "Direct access between owners and verified tenants",
+    bgClass: "from-emerald-500 to-teal-700"
+  }
+];
+
 export default function HomeListPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
@@ -24,6 +42,14 @@ export default function HomeListPage() {
   const [studentProperties, setStudentProperties] = useState<any[]>([]);
   const [familyProperties, setFamilyProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   // ... rest of the fetch properties logic and JSX
   useEffect(() => {
@@ -160,12 +186,28 @@ export default function HomeListPage() {
 
       <div className="px-4 flex flex-col gap-8 mt-2">
         
-        {/* 3. HERO SECTION */}
-        <div className="w-full rounded-2xl p-6 bg-gradient-to-b from-[#b22394] to-[#1819a8] flex flex-col justify-center min-h-[140px] md:min-h-[160px] shadow-sm relative overflow-hidden">
-          {/* Subtle fade backdrop shape */}
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-white/10 to-transparent blur-md"></div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-1.5">Find your perfect stay</h2>
-          <p className="text-white/90 text-sm leading-snug lg:max-w-xs">Discover student-friendly apartments and family homes</p>
+        {/* 3. HERO SECTION (Fading Slideshow) */}
+        <div className="w-full rounded-2xl min-h-[140px] md:min-h-[160px] shadow-sm relative overflow-hidden group">
+           {slides.map((slide, index) => (
+             <div 
+               key={index}
+               className={`absolute inset-0 w-full h-full p-6 flex flex-col justify-center bg-gradient-to-b ${slide.bgClass} transition-opacity duration-1000 ease-in-out ${currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+             >
+               <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-white/10 to-transparent blur-md"></div>
+               <h2 className="text-xl md:text-2xl font-bold text-white mb-1.5 relative z-20">{slide.title}</h2>
+               <p className="text-white/90 text-sm leading-snug lg:max-w-xs relative z-20">{slide.subtitle}</p>
+             </div>
+           ))}
+           {/* Navigation Dots */}
+           <div className="absolute bottom-3 left-0 w-full flex justify-center gap-1.5 z-30">
+              {slides.map((_, index) => (
+                 <button 
+                   key={index} 
+                   onClick={() => setCurrentSlide(index)}
+                   className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-white w-4' : 'bg-white/50'}`}
+                 />
+              ))}
+           </div>
         </div>
 
         {/* 4. CATEGORY CARDS */}
