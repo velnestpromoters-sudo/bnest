@@ -219,23 +219,23 @@ export default function HomeListPage() {
         </div>
 
         {/* 4. CATEGORY CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 relative z-20 -mt-16 px-2 md:px-6">
-          <div className="rounded-[1.5rem] bg-white p-6 md:p-8 flex items-center gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] hover:-translate-y-1 transition-all cursor-pointer border border-gray-100 group">
-            <div className="bg-purple-50 p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300 shrink-0">
-              <GraduationCap className="w-8 h-8 md:w-10 md:h-10 text-[#801786]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 relative z-20 -mt-8 px-4 md:px-8">
+          <div className="rounded-2xl bg-white p-4 flex items-center gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-0.5 transition-all cursor-pointer border border-gray-100 group">
+            <div className="bg-purple-50 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">
+              <GraduationCap className="w-6 h-6 text-[#801786]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-[#111827] text-lg md:text-xl">Student / Bachelor</h3>
-              <p className="text-sm md:text-base text-[#6B7280] mt-1 font-medium">{studentProperties.length}+ Affordable stays</p>
+              <h3 className="font-bold text-[#111827] text-base">Student / Bachelor</h3>
+              <p className="text-xs text-[#6B7280] mt-0.5 font-medium">{studentProperties.length}+ Affordable stays</p>
             </div>
           </div>
-          <div className="rounded-[1.5rem] bg-white p-6 md:p-8 flex items-center gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] hover:-translate-y-1 transition-all cursor-pointer border border-gray-100 group">
-             <div className="bg-indigo-50 p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300 shrink-0">
-              <Home className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
+          <div className="rounded-2xl bg-white p-4 flex items-center gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-0.5 transition-all cursor-pointer border border-gray-100 group">
+             <div className="bg-indigo-50 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">
+              <Home className="w-6 h-6 text-indigo-600" />
             </div>
             <div>
-              <h3 className="font-extrabold text-[#111827] text-lg md:text-xl">Family Residences</h3>
-              <p className="text-sm md:text-base text-[#6B7280] mt-1 font-medium">{familyProperties.length}+ Premium homes</p>
+              <h3 className="font-bold text-[#111827] text-base">Family Residences</h3>
+              <p className="text-xs text-[#6B7280] mt-0.5 font-medium">{familyProperties.length}+ Premium homes</p>
             </div>
           </div>
         </div>
