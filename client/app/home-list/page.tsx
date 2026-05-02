@@ -219,23 +219,23 @@ export default function HomeListPage() {
         </div>
 
         {/* 4. CATEGORY CARDS */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-xl bg-[#F9FAFB] p-4 flex items-start gap-3">
-            <div className="bg-white p-2 rounded-full shadow-sm shrink-0">
-              <GraduationCap className="w-5 h-5 text-[#7C3AED]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 relative z-20 -mt-16 px-2 md:px-6">
+          <div className="rounded-[1.5rem] bg-white p-6 md:p-8 flex items-center gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] hover:-translate-y-1 transition-all cursor-pointer border border-gray-100 group">
+            <div className="bg-purple-50 p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300 shrink-0">
+              <GraduationCap className="w-8 h-8 md:w-10 md:h-10 text-[#801786]" />
             </div>
             <div>
-              <h3 className="font-semibold text-[#111827] text-sm">Student / Bachelor</h3>
-              <p className="text-xs text-[#6B7280] mt-0.5">{studentProperties.length}+ Affordable stays</p>
+              <h3 className="font-extrabold text-[#111827] text-lg md:text-xl">Student / Bachelor</h3>
+              <p className="text-sm md:text-base text-[#6B7280] mt-1 font-medium">{studentProperties.length}+ Affordable stays</p>
             </div>
           </div>
-          <div className="rounded-xl bg-[#F9FAFB] p-4 flex items-start gap-3">
-             <div className="bg-white p-2 rounded-full shadow-sm shrink-0">
-              <Home className="w-5 h-5 text-[#7C3AED]" />
+          <div className="rounded-[1.5rem] bg-white p-6 md:p-8 flex items-center gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] hover:-translate-y-1 transition-all cursor-pointer border border-gray-100 group">
+             <div className="bg-indigo-50 p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300 shrink-0">
+              <Home className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-[#111827] text-sm">Family</h3>
-              <p className="text-xs text-[#6B7280] mt-0.5">{familyProperties.length}+ Family homes</p>
+              <h3 className="font-extrabold text-[#111827] text-lg md:text-xl">Family Residences</h3>
+              <p className="text-sm md:text-base text-[#6B7280] mt-1 font-medium">{familyProperties.length}+ Premium homes</p>
             </div>
           </div>
         </div>
