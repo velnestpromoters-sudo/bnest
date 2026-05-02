@@ -118,7 +118,6 @@ export default function AdminDashboard() {
     { 
       title: 'Active Properties', 
       value: stats.properties.active, 
-      subtitle: `${stats.properties.total} Total (Including Drafts)`,
       icon: <Home className="w-6 h-6" />, 
       color: 'from-emerald-400 to-teal-500', 
       shadow: 'shadow-emerald-500/20',
