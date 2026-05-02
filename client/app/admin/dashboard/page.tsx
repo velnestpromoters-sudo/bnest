@@ -100,6 +100,14 @@ export default function AdminDashboard() {
 
   const cards = [
     { 
+      title: 'Total Users', 
+      value: stats.owners.length + stats.tenants.length, 
+      icon: <Users className="w-6 h-6" />, 
+      color: 'from-purple-500 to-indigo-500', 
+      shadow: 'shadow-purple-500/20',
+      onClick: () => setModalData({ title: 'All Platform Users', users: [...stats.owners, ...stats.tenants] })
+    },
+    { 
       title: 'Total Owners', 
       value: stats.owners.length, 
       icon: <UserCircle2 className="w-6 h-6" />, 
@@ -170,7 +178,7 @@ export default function AdminDashboard() {
         </motion.div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10">
           {cards.map((card, i) => (
             <motion.div
               key={card.title}
