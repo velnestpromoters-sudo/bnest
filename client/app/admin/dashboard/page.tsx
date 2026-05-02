@@ -42,7 +42,15 @@ export default function AdminDashboard() {
   // Modal state
   const [modalData, setModalData] = useState<{ title: string, users: AdminUser[] } | null>(null);
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return; // Wait for Zustand to hydrate
+
     if (!token || user?.role !== 'admin') {
       router.push('/admin/login');
       return;
@@ -58,7 +66,7 @@ export default function AdminDashboard() {
         setError(err.response?.data?.message || 'Failed to fetch admin statistics');
         if (err.response?.status === 401 || err.response?.status === 403) {
           logout();
-          router.push('/admin/login');
+          window.location.href = '/admin/login';
         }
       } finally {
         setLoading(false);
@@ -66,11 +74,11 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, [token, user, router, logout]);
+  }, [token, user, router, logout, mounted]);
 
   const handleLogout = () => {
     logout();
-    router.push('/');
+    window.location.href = '/';
   };
 
   if (loading) {
