@@ -61,7 +61,18 @@ exports.getProperty = async (req, res) => {
         isVerified: property.isVerified,
         matchScore: property.matchScore,
         moveInReady: property.moveInReady,
-        tenantNotes: property.tenantNotes
+        tenantNotes: property.tenantNotes,
+        floor: property.floor,
+        totalFloors: property.totalFloors,
+        areaSqft: property.areaSqft,
+        propertyAge: property.propertyAge,
+        highlights: property.highlights,
+        amenities: property.amenities,
+        furnishing: property.furnishing,
+        availability: property.availability,
+        preferences: property.preferences,
+        propertyType: property.propertyType,
+        pgDetails: property.pgDetails
       };
       return res.status(200).json({ success: true, data: limitedProperty, access: 'limited' });
     }
@@ -337,7 +348,7 @@ exports.updateProperty = async (req, res) => {
       }
 
       // Merge native updates securely avoiding ownerId or coordinate overwrites directly unless isolated
-      const allowedUpdates = ['title', 'rent', 'deposit', 'bhkType', 'tenantNotes', 'amenities', 'furnishing', 'availability', 'availableFrom', 'availableContactSlots'];
+      const allowedUpdates = ['title', 'rent', 'deposit', 'bhkType', 'tenantNotes', 'amenities', 'furnishing', 'availability', 'availableFrom', 'availableContactSlots', 'floor', 'totalFloors', 'areaSqft', 'propertyAge', 'highlights'];
       
       allowedUpdates.forEach(field => {
          if (req.body[field] !== undefined) {

@@ -22,7 +22,12 @@ export default function EditPropertyPage() {
      furnishing: 'none',
      availability: 'immediate',
      availableFrom: '',
-     amenities: [] as string[]
+     amenities: [] as string[],
+     floor: '',
+     totalFloors: '',
+     areaSqft: '',
+     propertyAge: '',
+     highlights: [] as string[]
   });
 
   useEffect(() => {
@@ -44,7 +49,12 @@ export default function EditPropertyPage() {
               furnishing: p.furnishing || 'none',
               availability: p.availability || 'immediate',
               availableFrom: p.availableFrom ? new Date(p.availableFrom).toISOString().split('T')[0] : '',
-              amenities: p.amenities || []
+              amenities: p.amenities || [],
+              floor: p.floor || '',
+              totalFloors: p.totalFloors || '',
+              areaSqft: p.areaSqft || '',
+              propertyAge: p.propertyAge || '',
+              highlights: p.highlights || []
            });
         } else {
            alert("Failed to load property.");
@@ -147,6 +157,50 @@ export default function EditPropertyPage() {
                </div>
             </div>
 
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 gap-4">
+               <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Floor Number</label>
+                  <input 
+                     type="number" 
+                     value={formData.floor}
+                     onChange={e => setFormData({...formData, floor: e.target.value})}
+                     className="w-full border p-3 rounded-xl outline-none focus:border-[#801786]"
+                  />
+               </div>
+               <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Total Floors</label>
+                  <input 
+                     type="number" 
+                     value={formData.totalFloors}
+                     onChange={e => setFormData({...formData, totalFloors: e.target.value})}
+                     className="w-full border p-3 rounded-xl outline-none focus:border-[#801786]"
+                  />
+               </div>
+               <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Area (Sq.ft)</label>
+                  <input 
+                     type="number" 
+                     value={formData.areaSqft}
+                     onChange={e => setFormData({...formData, areaSqft: e.target.value})}
+                     className="w-full border p-3 rounded-xl outline-none focus:border-[#801786]"
+                  />
+               </div>
+               <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Property Age</label>
+                  <select 
+                     value={formData.propertyAge}
+                     onChange={e => setFormData({...formData, propertyAge: e.target.value})}
+                     className="w-full border p-3 rounded-xl outline-none focus:border-[#801786] bg-white"
+                  >
+                     <option value="">Select Age</option>
+                     <option value="0-1 Year">0-1 Year</option>
+                     <option value="1-5 Years">1-5 Years</option>
+                     <option value="5-10 Years">5-10 Years</option>
+                     <option value="10+ Years">10+ Years</option>
+                  </select>
+               </div>
+            </div>
+
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-3">
                <label className="block text-sm font-bold text-gray-800">Amenities Provided</label>
                <div className="grid grid-cols-2 gap-3">
@@ -205,7 +259,21 @@ export default function EditPropertyPage() {
                )}
             </div>
 
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+             <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <label className="block text-sm font-bold text-gray-800 mb-1">Key Highlights (comma separated)</label>
+                <textarea 
+                   rows={2}
+                   value={formData.highlights.join(', ')}
+                   onChange={e => {
+                      const val = e.target.value;
+                      const arr = val.split(',').map(s => s.trim()).filter(Boolean);
+                      setFormData({...formData, highlights: arr});
+                   }}
+                   placeholder="e.g. North Facing, Vaastu Compliant, Close to Airport"
+                   className="w-full border p-3 rounded-xl focus:border-[#801786] outline-none mb-5"
+                   style={{ resize: 'none' }}
+                />
+
                <label className="block text-sm font-bold text-gray-800 mb-1">Special Notes for Tenants</label>
                <textarea 
                   rows={3}

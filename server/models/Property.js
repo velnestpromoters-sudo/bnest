@@ -46,6 +46,11 @@ const propertySchema = new mongoose.Schema({
     bachelorAllowed: Boolean,
     maxOccupants: Number
   },
+  floor: { type: Number },
+  totalFloors: { type: Number },
+  areaSqft: { type: Number },
+  propertyAge: { type: String, enum: ['0-1 Year', '1-5 Years', '5-10 Years', '10+ Years'] },
+  highlights: [{ type: String }],
   availableContactSlots: { type: Number, default: 4 },
   uniqueViewers: [{ type: String }]
 }, { timestamps: true });
