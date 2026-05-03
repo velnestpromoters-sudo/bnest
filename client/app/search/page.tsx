@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft as ArrowLeftLucide, Search as SearchLucide, SlidersHorizontal, TrendingUp, Navigation } from 'lucide-react';
 import { useLocationStore } from '@/store/locationStore';
@@ -15,6 +15,17 @@ export default function SearchPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Hardware Tracking Handler
   const handleTargetLocation = () => {
@@ -159,7 +170,7 @@ export default function SearchPage() {
           <ArrowLeftLucide className="w-6 h-6 text-slate-700" />
         </button>
         
-        <div className="flex-1 relative flex items-center">
+        <div ref={searchContainerRef} className="flex-1 relative flex items-center">
           <input 
             autoFocus
             type="text" 
