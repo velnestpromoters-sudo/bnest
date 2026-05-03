@@ -341,6 +341,23 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
       <div className="h-2 w-full bg-[#F5F5F7]"></div>
 
+      {/* SECTION 6.5: TENANT NOTES */}
+      {property.tenantNotes && (
+          <>
+             <div className="px-5 py-6 bg-white">
+                <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-4">
+                    <h3 className="text-[13px] font-bold text-[#111111] mb-2 flex items-center gap-1.5">
+                        <MessageSquare className="w-4 h-4 text-blue-600" /> Note from Owner
+                    </h3>
+                    <p className="text-[13px] text-[#666666] leading-relaxed whitespace-pre-wrap">
+                        {property.tenantNotes}
+                    </p>
+                </div>
+             </div>
+             <div className="h-2 w-full bg-[#F5F5F7]"></div>
+          </>
+      )}
+
       {/* SECTION 7: OWNER DETAILS (CONTROLLED BY PAYWALL) */}
       <div className="p-5 bg-white relative overflow-hidden pb-12">
          <h2 className="text-[19px] font-extrabold text-[#111111] mb-5 tracking-tight">Owner Details</h2>
