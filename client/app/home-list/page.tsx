@@ -109,7 +109,7 @@ export default function HomeListPage() {
   return (
     <div className="relative w-full min-h-screen bg-white pb-24 overflow-x-hidden font-sans text-[#111827]">
       
-      <div className="sticky top-0 z-50 bg-white px-4 pt-3 pb-3">
+      <div className="sticky top-0 z-50 bg-white px-4 pt-1 pb-2">
         <div className="flex items-center justify-between">
           <div 
              onClick={() => router.push('/about')}
