@@ -116,8 +116,8 @@ export default function HomeListPage() {
                onClick={() => router.push('/about')}
                className="flex items-center gap-0 cursor-pointer active:scale-95 transition-transform shrink-0"
             >
-              <Image src="/logo.svg" alt="Homyvo" width={84} height={84} className="shrink-0 object-contain drop-shadow-md" />
-              <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4">Homyvo</h1>
+              <Image src="/logo.svg" alt="Homyvo" width={56} height={56} className="shrink-0 object-contain drop-shadow-md" />
+              <h1 className="text-[22px] font-black text-[#111827] tracking-tighter -ml-2">Homyvo</h1>
             </div>
 
             {/* Desktop Search Bar */}
