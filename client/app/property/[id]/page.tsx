@@ -158,7 +158,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const isPG = property.propertyType === 'pg';
   const propertyTitlePrefix = isPG ? 'PG/Hostel for Rent in' : 'Flat/Apartment for Rent in';
   const bhkOrSharing = isPG ? `${property.pgDetails?.sharingType || 'Multi'} Sharing PG` : `${property.bhkType} BHK`;
-  const socialCount = property.viewCount || property.contactsYesterday || Math.floor(Math.random() * 5) + 2; // For visual proof if missing from backend
+  const socialCount = property.contactsYesterday || property.viewCount || 0;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] flex flex-col pb-40 font-sans selection:bg-[#801786]/20">
@@ -376,12 +376,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* SECTION 9: SOCIAL PROOF */}
-      <div className="fixed bottom-[88px] left-0 w-full z-40 bg-[#FDE8EF] border-t border-pink-100 py-2.5 px-4 flex items-center gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
-         <div className="w-6 h-6 bg-[#C72C9C] rounded-full flex items-center justify-center">
-             <Clock className="w-3.5 h-3.5 text-white" />
-         </div>
-         <span className="text-[13px] font-medium text-[#111111] tracking-tight">{socialCount} people already contacted yesterday</span>
-      </div>
+      {socialCount > 0 && (
+          <div className="fixed bottom-[88px] left-0 w-full z-40 bg-[#FDE8EF] border-t border-pink-100 py-2.5 px-4 flex items-center gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
+             <div className="w-6 h-6 bg-[#C72C9C] rounded-full flex items-center justify-center">
+                 <Clock className="w-3.5 h-3.5 text-white" />
+             </div>
+             <span className="text-[13px] font-medium text-[#111111] tracking-tight">{socialCount} people already contacted yesterday</span>
+          </div>
+      )}
 
       {/* SECTION 8: CONTACT ACTION BAR (STICKY BOTTOM) */}
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] z-50 px-4 py-3 pb-4">
