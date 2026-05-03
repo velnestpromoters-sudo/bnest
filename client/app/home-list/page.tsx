@@ -113,10 +113,24 @@ export default function HomeListPage() {
         <div className="flex items-center justify-between">
           <div 
              onClick={() => router.push('/about')}
-             className="flex items-center gap-0 cursor-pointer active:scale-95 transition-transform"
+             className="flex items-center gap-0 cursor-pointer active:scale-95 transition-transform shrink-0"
           >
             <Image src="/logo.svg" alt="Homyvo" width={84} height={84} className="shrink-0 object-contain drop-shadow-md" />
-            <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4">Homyvo</h1>
+            <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4 hidden sm:block">Homyvo</h1>
+          </div>
+
+          {/* Desktop Search Bar */}
+          <div className="flex-1 max-w-[600px] mx-2 lg:mx-8 hidden md:block">
+            <div onClick={() => router.push('/search')} className="flex items-center bg-white border border-[#E5E7EB] rounded-full h-[52px] px-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer active:scale-[0.98]">
+              <Search className="w-5 h-5 text-[#111827] shrink-0" />
+              <div className="flex-1 px-4 flex flex-col justify-center">
+                <span className="text-sm font-semibold text-[#111827] leading-tight">Search on Homyvo</span>
+                <span className="text-[11px] text-[#6B7280] leading-tight mt-0.5">Anywhere • Any week</span>
+              </div>
+              <div className="w-8 h-8 rounded-full border border-[#E5E7EB] flex items-center justify-center shrink-0 bg-slate-50">
+                <SlidersHorizontal className="w-4 h-4 text-[#111827]" />
+              </div>
+            </div>
           </div>
 
           {/* Top Right Controls */}
@@ -180,14 +194,14 @@ export default function HomeListPage() {
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-4 md:hidden">
           <div onClick={() => router.push('/search')} className="flex items-center bg-white border border-[#E5E7EB] rounded-full h-[56px] px-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer active:scale-[0.98]">
             <Search className="w-5 h-5 text-[#111827] shrink-0" />
             <div className="flex-1 px-3 flex flex-col justify-center">
               <span className="text-sm font-semibold text-[#111827] leading-tight">Search on Homyvo</span>
               <span className="text-xs text-[#6B7280] leading-tight mt-0.5">Anywhere • Any week</span>
             </div>
-            <div className="w-9 h-9 rounded-full border border-[#E5E7EB] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full border border-[#E5E7EB] flex items-center justify-center shrink-0 bg-slate-50">
               <SlidersHorizontal className="w-4 h-4 text-[#111827]" />
             </div>
           </div>
