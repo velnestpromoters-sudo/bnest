@@ -197,14 +197,14 @@ export default function SearchPage() {
                 {suggestions.map((sug, i) => (
                     <button 
                        key={i} 
-                       className="w-full text-left px-5 py-3.5 hover:bg-slate-50 flex items-center gap-3 transition-colors active:bg-slate-100 border-b border-slate-50 last:border-0"
+                       className="w-full text-left px-5 py-3.5 hover:bg-slate-50 flex items-start gap-3 transition-colors active:bg-slate-100 border-b border-slate-50 last:border-0"
                        onClick={() => {
                           setSearchQuery(sug);
                           setShowSuggestions(false);
                        }}
                     >
-                       <SearchLucide className="w-4 h-4 text-[#801786] shrink-0 opacity-40" />
-                       <span className="text-slate-700 font-medium text-sm line-clamp-1">{sug}</span>
+                       <SearchLucide className="w-4 h-4 text-[#801786] shrink-0 opacity-40 mt-[3px]" />
+                       <span className="text-slate-700 font-medium text-sm leading-snug">{sug}</span>
                     </button>
                 ))}
              </div>
