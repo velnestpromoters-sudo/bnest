@@ -109,7 +109,7 @@ export default function HomeListPage() {
   return (
     <div className="relative w-full min-h-screen bg-white pb-24 overflow-x-hidden font-sans text-[#111827]">
       
-      <div className="sticky top-0 z-50 bg-white px-4 pt-1 pb-2">
+      <div className="sticky top-0 z-50 bg-white px-4 pt-3 md:pt-1 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 lg:gap-10 flex-1">
             <div 
@@ -117,7 +117,7 @@ export default function HomeListPage() {
                className="flex items-center gap-0 cursor-pointer active:scale-95 transition-transform shrink-0"
             >
               <Image src="/logo.svg" alt="Homyvo" width={84} height={84} className="shrink-0 object-contain drop-shadow-md" />
-              <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4 hidden sm:block">Homyvo</h1>
+              <h1 className="text-[24px] font-black text-[#111827] tracking-tighter -ml-4">Homyvo</h1>
             </div>
 
             {/* Desktop Search Bar */}
