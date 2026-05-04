@@ -65,14 +65,14 @@ export default function LocationTracker() {
           const res = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
           const data = await res.json();
           if (data.success && data.location) {
-             setLocation(`📍 ${data.location}`, { lat, lng });
+             setLocation(`${data.location}`, { lat, lng });
           } else {
-             setLocation('📍 Unknown Area', { lat, lng });
+             setLocation('Unknown Area', { lat, lng });
           }
           router.push('/home'); // Swoop back to Reel with fresh location!
       } catch (err) {
           console.error("OSM Geocoding failed:", err);
-          setLocation('📍 Map Area', { lat, lng });
+          setLocation('Map Area', { lat, lng });
           router.push('/home');
       }
   };

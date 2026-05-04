@@ -116,7 +116,7 @@ export default function HomeReelPage() {
   // 1. Dual-Fallback Geolocation Architecture (Mappls Proxy -> BigDataCloud)
   useEffect(() => {
     // Only detect if user hasn't physically set their location manually yet
-    if (locationName === '📍 Select Location' && 'geolocation' in navigator) {
+    if (locationName === 'Select Location' && 'geolocation' in navigator) {
       setLocation('Locating...');
       
       navigator.geolocation.getCurrentPosition(
@@ -144,16 +144,16 @@ export default function HomeReelPage() {
                detected = bdcData.locality || bdcData.city || bdcData.principalSubdivision;
             }
 
-            setLocation(`📍 ${detected || 'Unknown Area'}`, { lat: latitude, lng: longitude });
+            setLocation(`${detected || 'Unknown Area'}`, { lat: latitude, lng: longitude });
 
           } catch (error) {
             console.error('Total Geocoding failure:', error);
-            setLocation('📍 Select Location');
+            setLocation('Select Location');
           }
         },
         (err) => {
           console.warn('Geolocation denied or failed:', err);
-          setLocation('📍 Select Location');
+          setLocation('Select Location');
         }
       );
     }

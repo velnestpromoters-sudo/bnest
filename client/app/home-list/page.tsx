@@ -128,9 +128,6 @@ export default function HomeListPage() {
                 <span className="text-sm font-semibold text-[#111827] leading-tight">Search on Homyvo</span>
                 <span className="text-[11px] text-[#6B7280] leading-tight mt-0.5">Anywhere • Any week</span>
               </div>
-              <div className="w-8 h-8 rounded-full border border-[#E5E7EB] flex items-center justify-center shrink-0 bg-slate-50">
-                <SlidersHorizontal className="w-4 h-4 text-[#111827]" />
-              </div>
             </div>
             </div>
           </div>
@@ -202,9 +199,6 @@ export default function HomeListPage() {
             <div className="flex-1 px-3 flex flex-col justify-center">
               <span className="text-sm font-semibold text-[#111827] leading-tight">Search on Homyvo</span>
               <span className="text-xs text-[#6B7280] leading-tight mt-0.5">Anywhere • Any week</span>
-            </div>
-            <div className="w-9 h-9 rounded-full border border-[#E5E7EB] flex items-center justify-center shrink-0 bg-slate-50">
-              <SlidersHorizontal className="w-4 h-4 text-[#111827]" />
             </div>
           </div>
         </div>

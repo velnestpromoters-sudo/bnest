@@ -7,7 +7,7 @@ interface LocationState {
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
-  locationName: '📍 Select Location', // Default empty state
+  locationName: 'Select Location', // Default empty state
   coordinates: null,
   setLocation: (name, coords) => set({ locationName: name, coordinates: coords || null }),
 }));

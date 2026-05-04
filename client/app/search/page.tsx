@@ -38,7 +38,7 @@ export default function SearchPage() {
     navigator.geolocation.getCurrentPosition(
        (pos) => {
           // Store physical coordinates dynamically protecting against duplicate town names
-          setLocation("📍 Validated GPS", { lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setLocation("Validated GPS", { lat: pos.coords.latitude, lng: pos.coords.longitude });
           setSearchQuery("Properties Near Me"); 
        },
        (err) => {
