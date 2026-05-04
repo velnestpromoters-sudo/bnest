@@ -51,7 +51,13 @@ export default function HomeListPage() {
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const [studentProperties, setStudentProperties] = useState<any[]>([]);
   const [familyProperties, setFamilyProperties] = useState<any[]>([]);
-  const [trendingProperties, setTrendingProperties] = useState<any[]>([]);
+  const [allRawProperties, setAllRawProperties] = useState<any[]>([]);
+  
+  const [trendingFilter, setTrendingFilter] = useState<'near_me' | 'search' | 'allover'>('allover');
+  const [trendingSearchText, setTrendingSearchText] = useState('');
+  const [showTrendingSearchInput, setShowTrendingSearchInput] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -72,7 +78,7 @@ export default function HomeListPage() {
           
           const students: any[] = [];
           const families: any[] = [];
-          const trending: any[] = [];
+          const rawForTrending: any[] = [];
           
           const now = new Date().getTime();
 
@@ -86,13 +92,13 @@ export default function HomeListPage() {
               type: typeStr,
               price: `₹${p.rent?.toLocaleString()}`,
               rating: (Math.random() * (5 - 4.2) + 4.2).toFixed(1), // Visual placeholder rating
-              img: p.images?.[0] || 'https://picsum.photos/id/1018/400/300'
+              img: p.images?.[0] || 'https://picsum.photos/id/1018/400/300',
+              coordinates: p.location?.coordinates || null,
+              views: p.uniqueViewers?.length || 0,
+              boostExpiresAt: p.boostExpiresAt
             };
 
-            // Business logic for sorting into categories
-            if (p.boostExpiresAt && new Date(p.boostExpiresAt).getTime() > now) {
-                trending.push(cardData);
-            }
+            rawForTrending.push(cardData);
 
             if (p.preferences?.bachelorAllowed || isPg) {
               students.push(cardData);
@@ -103,7 +109,7 @@ export default function HomeListPage() {
           
           setStudentProperties(students);
           setFamilyProperties(families);
-          setTrendingProperties(trending);
+          setAllRawProperties(rawForTrending);
         }
       } catch (error) {
         console.error("Failed to fetch property list", error);
@@ -114,6 +120,67 @@ export default function HomeListPage() {
     
     fetchProperties();
   }, []);
+
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const handleNearMe = () => {
+    setTrendingFilter('near_me');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => alert("Could not get location. Please enable location services.")
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
+  const trendingProperties = React.useMemo(() => {
+    let filtered = [...allRawProperties];
+    const now = new Date().getTime();
+
+    const sortByTrendingScore = (a: any, b: any) => {
+       const aBoosted = a.boostExpiresAt && new Date(a.boostExpiresAt).getTime() > now ? 1 : 0;
+       const bBoosted = b.boostExpiresAt && new Date(b.boostExpiresAt).getTime() > now ? 1 : 0;
+       if (aBoosted !== bBoosted) return bBoosted - aBoosted;
+       return (b.views || 0) - (a.views || 0);
+    };
+
+    if (trendingFilter === 'allover') {
+      filtered.sort(sortByTrendingScore);
+      filtered = filtered.slice(0, 15);
+    } 
+    else if (trendingFilter === 'near_me') {
+      if (userLocation) {
+        filtered = filtered.filter(p => {
+           if (!p.coordinates || p.coordinates.length < 2) return false;
+           const pLng = p.coordinates[0];
+           const pLat = p.coordinates[1];
+           const dist = getDistance(userLocation.lat, userLocation.lng, pLat, pLng);
+           return dist <= 30; // 30km radius
+        });
+      }
+      filtered.sort(sortByTrendingScore);
+    }
+    else if (trendingFilter === 'search') {
+      if (trendingSearchText) {
+        const search = trendingSearchText.toLowerCase();
+        filtered = filtered.filter(p => p.title.toLowerCase().includes(search));
+      }
+      filtered.sort(sortByTrendingScore);
+    }
+
+    return filtered;
+  }, [allRawProperties, trendingFilter, userLocation, trendingSearchText]);
 
   return (
     <div className="relative w-full min-h-screen bg-white pb-24 overflow-x-hidden font-sans text-[#111827]">
@@ -288,13 +355,60 @@ export default function HomeListPage() {
             <path d="M 0 0 Q 48 48 100 100" fill="none" stroke="#ffffff" strokeWidth="0.5" strokeOpacity="0.9" />
           </svg>
           
-          <div className="mb-4 flex items-center justify-between relative z-20">
+          <div className="mb-4 flex flex-col items-start justify-between relative z-20">
             <div>
                <h2 className="text-xl font-black text-blue-900 flex items-center gap-2">
                    <Star className="w-5 h-5 text-blue-600 fill-blue-600" />
                    Trending Now
                </h2>
-               <p className="text-sm text-blue-700/80 font-medium">Most popular places in Tamil Nadu</p>
+               <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                   <p className="text-xs text-blue-700/80 font-medium mr-1 hidden md:block">Filters:</p>
+                   
+                   <button 
+                      onClick={handleNearMe}
+                      className={`text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border transition-colors shadow-sm ${trendingFilter === 'near_me' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                   >
+                     Near Me
+                   </button>
+                   
+                   {showTrendingSearchInput ? (
+                      <input 
+                        type="text" 
+                        autoFocus
+                        placeholder="Type place..." 
+                        value={trendingSearchText}
+                        onChange={(e) => {
+                           setTrendingFilter('search');
+                           setTrendingSearchText(e.target.value);
+                        }}
+                        onBlur={() => {
+                           if (!trendingSearchText) setShowTrendingSearchInput(false);
+                        }}
+                        className="text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-600 w-24 sm:w-32 shadow-sm text-blue-900 bg-white"
+                      />
+                   ) : (
+                     <button 
+                        onClick={() => {
+                          setTrendingFilter('search');
+                          setShowTrendingSearchInput(true);
+                        }}
+                        className={`text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border transition-colors shadow-sm ${trendingFilter === 'search' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                     >
+                       Search Place
+                     </button>
+                   )}
+
+                   <button 
+                      onClick={() => {
+                         setTrendingFilter('allover');
+                         setTrendingSearchText('');
+                         setShowTrendingSearchInput(false);
+                      }}
+                      className={`text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border transition-colors shadow-sm ${trendingFilter === 'allover' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                   >
+                     Allover
+                   </button>
+               </div>
             </div>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x min-h-[150px] relative z-20">
