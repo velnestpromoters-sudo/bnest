@@ -259,10 +259,50 @@ export default function HomeListPage() {
 
         {/* 5. TRENDING NOW */}
         <section className="bg-blue-50 -mx-4 px-4 py-6 border-y border-blue-100 shadow-inner my-2 relative overflow-hidden">
-          {/* Slanted Red Corner Ribbon */}
-          <div className="absolute -right-12 top-5 w-40 bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-red-600/30 rotate-45 z-10 pointer-events-none">
-            HOT
-          </div>
+          {/* Slanted Red Corner Ribbon (3D Folded Style + Classic Serif Font) */}
+          <svg viewBox="0 0 200 200" className="absolute top-0 right-0 w-[110px] h-[110px] pointer-events-none z-10 drop-shadow-lg">
+            <defs>
+              <linearGradient id="ribbon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ff1a1a" />
+                <stop offset="40%" stopColor="#d10000" />
+                <stop offset="100%" stopColor="#8a0000" />
+              </linearGradient>
+              <linearGradient id="fold-highlight" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="35%" stopColor="#ffffff" stopOpacity="0" />
+                <stop offset="48%" stopColor="#ffffff" stopOpacity="0.8" />
+                <stop offset="52%" stopColor="#ffffff" stopOpacity="0.9" />
+                <stop offset="65%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+              <filter id="shadow">
+                <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.6"/>
+              </filter>
+            </defs>
+            
+            {/* Main Red Concave Shape */}
+            <path d="M 0 0 L 200 0 L 200 200 Q 110 110 0 0 Z" fill="url(#ribbon-grad)" />
+            
+            {/* 3D Fold Highlight over the curve */}
+            <path d="M 0 0 Q 110 110 200 200 Q 120 100 0 0 Z" fill="url(#fold-highlight)" />
+            
+            {/* White Border Effect on the edge */}
+            <path d="M 0 0 Q 110 110 200 200" fill="none" stroke="white" strokeWidth="3" strokeOpacity="0.8" />
+
+            {/* Classic Serif 'HOT' Text */}
+            <text 
+               x="135" y="70" 
+               fontFamily='"Times New Roman", Georgia, serif' 
+               fontSize="38" 
+               fontWeight="900" 
+               fontStyle="italic"
+               fill="#ffffff" 
+               transform="rotate(45 135 70)" 
+               textAnchor="middle" 
+               letterSpacing="4" 
+               filter="url(#shadow)"
+            >
+              HOT
+            </text>
+          </svg>
           
           <div className="mb-4 flex items-center justify-between">
             <div>
