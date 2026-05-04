@@ -158,8 +158,9 @@ export default function HomeListPage() {
   const uniqueAreas = React.useMemo(() => {
      const areas = new Set<string>();
      allRawProperties.forEach(p => {
-        const areaName = p.title.split(',')[0].trim();
-        if (areaName && areaName !== 'Unknown Area') areas.add(areaName);
+        if (p.title && !p.title.includes('Unknown Area')) {
+           areas.add(p.title);
+        }
      });
      return Array.from(areas);
   }, [allRawProperties]);
@@ -411,7 +412,7 @@ export default function HomeListPage() {
                           }}
                           onFocus={() => setShowDropdown(true)}
                           onBlur={() => {
-                             setTimeout(() => setShowDropdown(false), 200); // delay to allow click on dropdown
+                             setShowDropdown(false);
                              if (!trendingSearchText) setShowTrendingSearchInput(false);
                           }}
                           className="text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-600 w-32 sm:w-40 shadow-sm text-blue-900 bg-white"
@@ -422,7 +423,8 @@ export default function HomeListPage() {
                                <div 
                                  key={idx} 
                                  className="px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 cursor-pointer font-medium border-b border-gray-100 last:border-0"
-                                 onClick={() => {
+                                 onMouseDown={(e) => {
+                                    e.preventDefault(); // Prevents input blur
                                     setTrendingSearchText(area);
                                     setTrendingFilter('search');
                                     setShowDropdown(false);
