@@ -77,6 +77,40 @@ exports.searchProperties = async (req, res) => {
       }
     }
 
+const distance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+};
+
+    // Calculate exact distances natively for all matching properties
+    if (lat && lng && lat !== 'null' && lng !== 'null') {
+      const numericLat = Number(lat);
+      const numericLng = Number(lng);
+      
+      const enrichedResults = results.map(prop => {
+         const pData = prop.toObject ? prop.toObject() : prop;
+         if (pData.location && pData.location.coordinates && pData.location.coordinates.length === 2) {
+             const [pLng, pLat] = pData.location.coordinates;
+             pData.calculatedDistanceKm = parseFloat(distance(numericLat, numericLng, pLat, pLng).toFixed(2));
+         }
+         return pData;
+      });
+      // Sort by distance locally to guarantee closest-first UX
+      enrichedResults.sort((a, b) => (a.calculatedDistanceKm || 999) - (b.calculatedDistanceKm || 999));
+      
+      return res.status(200).json({ success: true, count: enrichedResults.length, data: enrichedResults });
+    }
+
     res.status(200).json({ success: true, count: results.length, data: results });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

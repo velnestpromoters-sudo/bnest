@@ -25,18 +25,34 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
 
     if (data && data.address) {
-      // Bypass non-human micro-jurisdictions like "Ward 36" by explicitly filtering out numerics when parsing the hierarchy natively
+      // Bypass non-human micro-jurisdictions like "Ward 36"
       const validName = (name: string | undefined) => (name && !name.toLowerCase().includes('ward') && !/\d/.test(name)) ? name : null;
       
-      const detectedLocation = validName(data.address.suburb) 
-                            || validName(data.address.village)
-                            || validName(data.address.town)
-                            || validName(data.address.city_district) 
-                            || validName(data.address.neighbourhood)
-                            || validName(data.address.city) 
-                            || 'Unknown Location';
+      const a = data.address || {};
+      const area = validName(a.suburb) || validName(a.neighbourhood) || validName(a.village) || "";
+      const city = validName(a.city) || validName(a.town) || validName(a.county) || "";
+      const state = a.state || "";
+      const pincode = a.postcode || "";
+      
+      let confidence = 0;
+      if (a.road) confidence += 40;
+      if (area) confidence += 30;
+      if (city) confidence += 20;
 
-      return NextResponse.json({ success: true, location: detectedLocation, raw: data });
+      const detectedLocation = area || city || 'Unknown Location';
+      
+      const geoData = {
+        lat: parseFloat(lat as string),
+        lng: parseFloat(lng as string),
+        area,
+        city,
+        state,
+        pincode,
+        fullAddress: data.display_name,
+        confidence
+      };
+
+      return NextResponse.json({ success: true, location: detectedLocation, geoData, raw: data });
     } else {
       return NextResponse.json({ success: false, error: 'No precise district found' }, { status: 404 });
     }

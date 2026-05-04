@@ -86,24 +86,41 @@ export default function SearchPage() {
             }
         } else {
             try {
-                let osmUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(targetGeo)}&limit=10`;
-                
-                // If user activated their hardware tracker, inject strict physical boundaries isolating the predictive mapping explicitly within a 33km radius of their origin natively
+                // 1. Primary: Photon Search (Typo tolerant, Spatial bias)
+                let photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(targetGeo)}&limit=5`;
                 if (coordinates?.lat && coordinates?.lng) {
-                    osmUrl += `&viewbox=${coordinates.lng-0.3},${coordinates.lat+0.3},${coordinates.lng+0.3},${coordinates.lat-0.3}&bounded=1`;
+                    photonUrl += `&lat=${coordinates.lat}&lon=${coordinates.lng}`;
                 }
 
-                const geoRes = await fetch(osmUrl, {
-                    headers: { 'User-Agent': 'bnest-geo-engine' }
-                });
-                const geoData = await geoRes.json();
+                let geoData = [];
+                try {
+                    const photonRes = await fetch(photonUrl);
+                    const photonJson = await photonRes.json();
+                    if (photonJson.features && photonJson.features.length > 0) {
+                        geoData = photonJson.features.map((f: any) => ({
+                            lat: f.geometry.coordinates[1],
+                            lon: f.geometry.coordinates[0],
+                            display_name: [f.properties.name, f.properties.city, f.properties.state].filter(Boolean).join(', ')
+                        }));
+                    }
+                } catch (e) {
+                    console.warn("Photon failed, falling back to Nominatim");
+                }
+
+                // 2. Fallback: Nominatim (Strict string match)
+                if (geoData.length === 0) {
+                    let osmUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(targetGeo)}&limit=5`;
+                    const geoRes = await fetch(osmUrl, { headers: { 'User-Agent': 'bnest-geo-engine' } });
+                    geoData = await geoRes.json();
+                }
+
                 if (geoData && geoData.length > 0) {
                     lat = geoData[0].lat;
                     lng = geoData[0].lon;
                     
-                    // Generate predictive suggestions mapping exact area, district, and state names natively
+                    // Generate predictive suggestions natively
                     const places = geoData.map((g: any) => {
-                        const chunks = g.display_name.split(',');
+                        const chunks = (g.display_name || '').split(',');
                         return chunks.slice(0, 3).join(',').trim();
                     }).filter(Boolean);
                     const lowerText = rawText.toLowerCase();
