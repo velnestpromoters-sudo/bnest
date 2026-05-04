@@ -381,7 +381,7 @@ export default function HomeListPage() {
             <path d="M 0 0 Q 48 48 100 100" fill="none" stroke="#ffffff" strokeWidth="0.5" strokeOpacity="0.9" />
           </svg>
           
-          <div className="mb-4 flex flex-col items-start justify-between relative z-20">
+          <div className="mb-4 flex flex-col items-start justify-between relative z-50">
             <div>
                <h2 className="text-xl font-black text-blue-900 flex items-center gap-2">
                    <Star className="w-5 h-5 text-blue-600 fill-blue-600" />
