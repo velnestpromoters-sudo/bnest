@@ -350,7 +350,7 @@ export default function HomeListPage() {
         </div>
 
         {/* 5. TRENDING NOW */}
-        <section className="bg-blue-50 -mx-4 px-4 py-6 border-y border-blue-100 shadow-inner my-2 relative overflow-hidden">
+        <section className="bg-blue-50 -mx-4 px-4 py-6 border-y border-blue-100 shadow-inner my-2 relative z-30">
           {/* Photorealistic 3D Folded Corner Ribbon */}
           <svg viewBox="0 0 100 100" className="absolute top-0 right-0 w-[140px] h-[140px] pointer-events-none z-10 drop-shadow-xl">
             <defs>
