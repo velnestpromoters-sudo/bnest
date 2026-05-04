@@ -290,9 +290,9 @@ export default function HomeListPage() {
             {/* Classic Prestige Serif 'HOT' Text */}
             <text 
                x="74" y="26" 
-               fontFamily='"Brush Script MT", "Lucida Handwriting", "Dancing Script", cursive' 
-               fontSize="24" 
-               fontWeight="normal" 
+               fontFamily='"JetBrains Mono", monospace' 
+               fontSize="20" 
+               fontWeight="bold" 
                fill="#ffffff" 
                transform="rotate(45 74 26)" 
                textAnchor="middle" 
@@ -300,7 +300,7 @@ export default function HomeListPage() {
                letterSpacing="1.5" 
                style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.9), 0px 0px 4px rgba(255,0,0,0.8)' }}
             >
-              Hot
+              HOT
             </text>
           </svg>
           
