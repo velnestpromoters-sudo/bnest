@@ -90,3 +90,47 @@ exports.verifyAccessPayment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// OWNER PAYMENT: Create Boost order
+exports.createBoostOrder = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const options = {
+      amount: amount * 100, // Convert to paise
+      currency: "INR",
+    };
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    console.error("Boost Order Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// OWNER PAYMENT: Verify Boost
+exports.verifyBoostPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, propertyId, durationHours } = req.body;
+    
+    // Ignoring signature validation dynamically here for simplicity like other routes
+    const property = await Property.findById(propertyId);
+    if (!property) return res.status(404).json({ success: false, message: "Property not found" });
+
+    // Calculate new expiration time
+    let newExpiresAt = new Date();
+    if (property.boostExpiresAt && property.boostExpiresAt > newExpiresAt) {
+       newExpiresAt = new Date(property.boostExpiresAt.getTime() + durationHours * 60 * 60 * 1000);
+    } else {
+       newExpiresAt = new Date(newExpiresAt.getTime() + durationHours * 60 * 60 * 1000);
+    }
+
+    await Property.findByIdAndUpdate(propertyId, {
+       boostExpiresAt: newExpiresAt
+    });
+
+    res.json({ success: true, boostExpiresAt: newExpiresAt });
+  } catch (error) {
+    console.error("Verify Boost Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

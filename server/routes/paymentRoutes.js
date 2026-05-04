@@ -8,4 +8,7 @@ router.post('/verify-listing', paymentController.verifyListingPayment);
 router.post('/create-access', paymentController.createAccessOrder);
 router.post('/verify-access', paymentController.verifyAccessPayment);
 
+router.post('/create-boost', paymentController.createBoostOrder);
+router.post('/verify-boost', paymentController.verifyBoostPayment);
+
 module.exports = router;

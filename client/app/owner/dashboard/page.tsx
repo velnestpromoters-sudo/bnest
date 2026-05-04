@@ -5,6 +5,37 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 
+const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
+    const [timeLeft, setTimeLeft] = useState("");
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const target = new Date(targetDate).getTime();
+            const now = new Date().getTime();
+            const distance = target - now;
+
+            if (distance < 0) {
+                setTimeLeft("00:00:00:000");
+                clearInterval(interval);
+                return;
+            }
+
+            const hours = Math.floor(distance / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const ms = Math.floor((distance % 1000));
+
+            setTimeLeft(
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`
+            );
+        }, 50); // Fast update for ms
+
+        return () => clearInterval(interval);
+    }, [targetDate]);
+
+    return <div className="text-2xl font-black font-mono tracking-tighter text-emerald-700 tabular-nums">{timeLeft}</div>;
+};
+
 export default function OwnerDashboard() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -14,8 +45,66 @@ export default function OwnerDashboard() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [availabilityModalData, setAvailabilityModalData] = useState<any>(null);
+  const [boostModalData, setBoostModalData] = useState<any>(null);
   const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
+  const [isProcessingBoost, setIsProcessingBoost] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleBoostPayment = async (amount: number, durationHours: number) => {
+      setIsProcessingBoost(true);
+      try {
+          const orderRes = await fetch('/api/payment/create-boost', { 
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ amount })
+          });
+          const orderData = await orderRes.json();
+          
+          const options = {
+              key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mock_id',
+              amount: orderData.amount,
+              currency: 'INR',
+              name: 'Homyvo Boost',
+              description: `Boost property for ${durationHours} hrs`,
+              order_id: orderData.id,
+              handler: async function (response: any) {
+                  const verifyRes = await fetch('/api/payment/verify-boost', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                          razorpay_order_id: response.razorpay_order_id,
+                          razorpay_payment_id: response.razorpay_payment_id,
+                          razorpay_signature: response.razorpay_signature,
+                          propertyId: boostModalData._id,
+                          durationHours
+                      })
+                  });
+                  const verifyData = await verifyRes.json();
+                  if (verifyData.success) {
+                      setProperties((prev: any) => prev.map((p: any) => 
+                          p._id === boostModalData._id ? { ...p, boostExpiresAt: verifyData.boostExpiresAt } : p
+                      ));
+                      alert("Property Boosted Successfully!");
+                  } else {
+                      alert('Payment verification failed');
+                  }
+                  setIsProcessingBoost(false);
+              },
+              prefill: { name: user?.name || 'Owner', contact: '9999999999' },
+              theme: { color: '#0066FF' }
+          };
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on('payment.failed', function (response: any){
+              alert("Payment Failed!");
+              setIsProcessingBoost(false);
+          });
+          rzp.open();
+      } catch (err) {
+          console.error(err);
+          alert('Failed to initiate payment.');
+          setIsProcessingBoost(false);
+      }
+  };
 
   useEffect(() => {
     // Basic auth wrap
@@ -188,6 +277,18 @@ export default function OwnerDashboard() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                    </button>
 
+                   {/* Top Left Rocket (Boost) Button */}
+                   <button 
+                      onClick={(e) => {
+                         e.stopPropagation();
+                         setBoostModalData(prop);
+                      }}
+                      className="absolute top-3 left-14 z-20 p-1.5 bg-blue-600/90 backdrop-blur-md rounded-full shadow-lg border border-blue-300 text-white hover:bg-blue-700 transition-colors"
+                      title="Boost Property"
+                   >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                   </button>
+
                    {/* Floating Top Right Tag */}
                    <button 
                       onClick={(e) => handleToggleStatus(e, prop._id)}
@@ -254,6 +355,79 @@ export default function OwnerDashboard() {
            </div>
          )}
       </div>
+
+      {/* BOOST MODAL */}
+      {boostModalData && (
+         <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl relative animate-in slide-in-from-bottom-8">
+               <div className="bg-blue-50 border-b border-blue-100 p-5 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                      </div>
+                      <h3 className="font-black text-blue-900 text-lg">Boost Property</h3>
+                  </div>
+                  <button onClick={() => setBoostModalData(null)} disabled={isProcessingBoost} className="p-1 text-blue-400 hover:text-blue-800 rounded-lg hover:bg-blue-200 transition-colors">
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+               </div>
+               
+               <div className="p-5 flex flex-col gap-4">
+                  <p className="text-sm font-bold text-gray-600">Boost your property to the top of the <span className="text-blue-600">Trending Now</span> section to get 10x more tenant views!</p>
+                  
+                  {boostModalData.boostExpiresAt && new Date(boostModalData.boostExpiresAt) > new Date() && (
+                      <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex flex-col items-center">
+                          <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Boost Active - Time Remaining</p>
+                          <CountdownTimer targetDate={boostModalData.boostExpiresAt} />
+                          <p className="text-[10px] text-emerald-500 mt-2 text-center">You can extend your time by purchasing another package below.</p>
+                      </div>
+                  )}
+
+                  <div className="flex flex-col gap-3 mt-2">
+                      {/* Package 1 */}
+                      <button 
+                         onClick={() => handleBoostPayment(99, 36)}
+                         disabled={isProcessingBoost}
+                         className="flex items-center justify-between p-4 border-2 border-slate-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left active:scale-95 group"
+                      >
+                         <div>
+                             <p className="font-black text-gray-900 group-hover:text-blue-700">36 Hours Boost</p>
+                             <p className="text-xs text-gray-500 font-medium">+150 Visibility Points</p>
+                         </div>
+                         <div className="bg-blue-100 text-blue-700 font-black px-3 py-1.5 rounded-lg">₹99</div>
+                      </button>
+
+                      {/* Package 2 */}
+                      <button 
+                         onClick={() => handleBoostPayment(199, 60)}
+                         disabled={isProcessingBoost}
+                         className="flex items-center justify-between p-4 border-2 border-slate-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left active:scale-95 group relative overflow-hidden"
+                      >
+                         <div className="absolute top-0 right-0 bg-[#ec38b7] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-bl-lg">Popular</div>
+                         <div>
+                             <p className="font-black text-gray-900 group-hover:text-blue-700">60 Hours Boost</p>
+                             <p className="text-xs text-gray-500 font-medium">+300 Visibility Points</p>
+                         </div>
+                         <div className="bg-blue-100 text-blue-700 font-black px-3 py-1.5 rounded-lg">₹199</div>
+                      </button>
+
+                      {/* Package 3 */}
+                      <button 
+                         onClick={() => handleBoostPayment(299, 130)}
+                         disabled={isProcessingBoost}
+                         className="flex items-center justify-between p-4 border-2 border-blue-200 bg-blue-50/50 rounded-xl hover:border-blue-500 hover:bg-blue-100 transition-all text-left active:scale-95 group"
+                      >
+                         <div>
+                             <p className="font-black text-blue-900 group-hover:text-blue-700">130 Hours Boost</p>
+                             <p className="text-xs text-blue-600/80 font-medium">Maximum Visibility & Reach</p>
+                         </div>
+                         <div className="bg-blue-600 text-white font-black px-3 py-1.5 rounded-lg shadow-md">₹299</div>
+                      </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      )}
 
       {/* QUICK AVAILABILITY EDITOR MODAL */}
       {availabilityModalData && (

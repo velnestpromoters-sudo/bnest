@@ -52,7 +52,8 @@ const propertySchema = new mongoose.Schema({
   propertyAge: { type: String, enum: ['0-1 Year', '1-5 Years', '5-10 Years', '10+ Years'] },
   highlights: [{ type: String }],
   availableContactSlots: { type: Number, default: 4 },
-  uniqueViewers: [{ type: String }]
+  uniqueViewers: [{ type: String }],
+  boostExpiresAt: { type: Date }
 }, { timestamps: true });
 
 propertySchema.index({ "location.coordinates": "2dsphere" });

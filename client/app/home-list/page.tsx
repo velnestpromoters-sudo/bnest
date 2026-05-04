@@ -51,6 +51,7 @@ export default function HomeListPage() {
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const [studentProperties, setStudentProperties] = useState<any[]>([]);
   const [familyProperties, setFamilyProperties] = useState<any[]>([]);
+  const [trendingProperties, setTrendingProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -71,7 +72,10 @@ export default function HomeListPage() {
           
           const students: any[] = [];
           const families: any[] = [];
+          const trending: any[] = [];
           
+          const now = new Date().getTime();
+
           fetched.forEach((p: any) => {
             const isPg = p.propertyType === 'pg';
             const typeStr = isPg ? 'PG' : (p.bhkType || 'Apartment');
@@ -86,6 +90,10 @@ export default function HomeListPage() {
             };
 
             // Business logic for sorting into categories
+            if (p.boostExpiresAt && new Date(p.boostExpiresAt).getTime() > now) {
+                trending.push(cardData);
+            }
+
             if (p.preferences?.bachelorAllowed || isPg) {
               students.push(cardData);
             } else {
@@ -95,6 +103,7 @@ export default function HomeListPage() {
           
           setStudentProperties(students);
           setFamilyProperties(families);
+          setTrendingProperties(trending);
         }
       } catch (error) {
         console.error("Failed to fetch property list", error);
@@ -248,15 +257,31 @@ export default function HomeListPage() {
           </div>
         </div>
 
-        {/* 5. TRENDING NOW (Placeholder) */}
-        <section>
-          <div className="mb-3">
-            <h2 className="text-lg font-bold text-[#111827]">Trending Now</h2>
-            <p className="text-sm text-[#6B7280]">Popular places in Tamil Nadu</p>
+        {/* 5. TRENDING NOW */}
+        <section className="bg-blue-50 -mx-4 px-4 py-6 border-y border-blue-100 shadow-inner my-2">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+               <h2 className="text-xl font-black text-blue-900 flex items-center gap-2">
+                   <Star className="w-5 h-5 text-blue-600 fill-blue-600" />
+                   Trending Now
+               </h2>
+               <p className="text-sm text-blue-700/80 font-medium">Most popular places in Tamil Nadu</p>
+            </div>
+            <div className="bg-blue-600 text-white text-[10px] uppercase font-black px-2 py-1 rounded-md tracking-wider shadow-sm">Hot</div>
           </div>
-          <div className="w-full bg-[#111827]/5 border border-[#111827]/10 rounded-2xl h-[120px] flex flex-col items-center justify-center text-center">
-            <Clock className="w-6 h-6 text-[#111827]/40 mb-2" />
-            <h3 className="font-semibold text-[#111827]/60 text-sm">Will be updated soon</h3>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x min-h-[150px]">
+             {isLoading ? (
+               <div className="w-full flex justify-center py-4">
+                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+               </div>
+             ) : trendingProperties.length > 0 ? (
+               <HorizontalScrollCards items={trendingProperties} router={router} />
+             ) : (
+               <div className="w-full bg-white/50 backdrop-blur-sm border border-blue-200 rounded-2xl h-[120px] flex flex-col items-center justify-center text-center">
+                 <Clock className="w-6 h-6 text-blue-400 mb-2" />
+                 <h3 className="font-semibold text-blue-800/60 text-sm">No trending properties currently.</h3>
+               </div>
+             )}
           </div>
         </section>
 
