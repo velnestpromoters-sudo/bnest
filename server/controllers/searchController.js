@@ -41,6 +41,12 @@ exports.searchProperties = async (req, res) => {
         query.$and = customFilters;
     }
 
+    // Natural Language Price Matching: "under 5000", "below 10000", "max 8000"
+    const priceMatch = qStr.match(/(?:under|below|max|<)\s*(\d+)/i);
+    if (priceMatch && priceMatch[1]) {
+        query.rent = { $lte: parseInt(priceMatch[1], 10) };
+    }
+
     let results = [];
 
     // 2. Fundamental Spatial Search (Overrides entire text reliance)
