@@ -17,14 +17,16 @@ exports.searchProperties = async (req, res) => {
              { propertyType: 'pg', "pgDetails.gender": { $in: ['boys', 'co-living'] } } 
            ] 
         });
-    } else if (qStr.match(/\bgirls\b/)) {
+    }
+    if (qStr.match(/\bgirls\b/)) {
         customFilters.push({ 
            $or: [ 
              { "preferences.bachelorAllowed": true }, 
              { propertyType: 'pg', "pgDetails.gender": { $in: ['girls', 'co-living'] } } 
            ] 
         });
-    } else if (qStr.match(/\bbachelor\b|\bpg\b/)) {
+    }
+    if (qStr.match(/\bbachelor\b|\bpg\b/) && !qStr.match(/\bboys\b/) && !qStr.match(/\bgirls\b/)) {
         customFilters.push({ 
            $or: [ 
              { "preferences.bachelorAllowed": true }, 
@@ -73,9 +75,14 @@ exports.searchProperties = async (req, res) => {
     // 4. Ultimate String Fallback (if user typed nonsense and OSM broke entirely)
     else {
       if (queryText) {
+        // Strip out intent keywords so we only regex search the actual location name
+        const cleanLocationStr = qStr.replace(/\b(pg|boys|girls|rent|house|apartment|bhk|room|flat|villa|mens|womens|in|near|around|for|under|below|max|<|\d+)\b/gi, '').trim();
+        const searchStr = cleanLocationStr || qStr;
+        
         query.$or = [
-          { "location.area": new RegExp(queryText, "i") },
-          { title: new RegExp(queryText, "i") }
+          { "location.area": new RegExp(searchStr, "i") },
+          { title: new RegExp(searchStr, "i") },
+          { "location.city": new RegExp(searchStr, "i") }
         ];
         results = await Property.find(query).limit(20);
       } else {
