@@ -42,18 +42,28 @@ export default function CategoryPage() {
 
     fetchCategoryProperties();
   }, [type]);
+  const isStudent = type === 'student';
 
   const filteredResults = React.useMemo(() => {
       let res = [...properties];
-      if (localFilters.type === 'pg') res = res.filter(r => r.propertyType === 'pg');
-      if (localFilters.type === 'apartment') res = res.filter(r => r.propertyType === 'apartment');
+      if (isStudent && localFilters.type !== 'all') {
+          res = res.filter(r => {
+             if (r.propertyType !== 'pg') return true; 
+             if (localFilters.type === 'boys') return ['boys', 'co-living'].includes(r.pgDetails?.gender);
+             if (localFilters.type === 'girls') return ['girls', 'co-living'].includes(r.pgDetails?.gender);
+             if (localFilters.type === 'co') return r.pgDetails?.gender === 'co-living';
+             return true;
+          });
+      } else if (!isStudent && localFilters.type !== 'all') {
+          if (localFilters.type === '1bhk') res = res.filter(r => r.bhkType === '1bhk');
+          if (localFilters.type === '2bhk') res = res.filter(r => r.bhkType === '2bhk');
+          if (localFilters.type === '3bhk') res = res.filter(r => r.bhkType === '3bhk');
+      }
       
       if (localFilters.sort === 'price_low') res.sort((a,b) => a.rent - b.rent);
       if (localFilters.sort === 'price_high') res.sort((a,b) => b.rent - a.rent);
       return res;
-  }, [properties, localFilters]);
-
-  const isStudent = type === 'student';
+  }, [properties, localFilters, isStudent]);
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-slate-50">
@@ -111,17 +121,31 @@ export default function CategoryPage() {
                        <div className="absolute right-0 top-[120%] mt-1 w-56 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50 animate-in fade-in slide-in-from-top-1">
                           <div className="mb-3">
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Property Type</p>
-                             <div className="flex flex-wrap gap-1.5">
-                               {['all', 'pg', 'apartment'].map(t => (
-                                  <button 
-                                     key={t}
-                                     onClick={() => setLocalFilters(prev => ({...prev, type: t}))}
-                                     className={`px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-colors ${localFilters.type === t ? 'bg-[#801786] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                                  >
-                                     {t}
-                                  </button>
-                               ))}
-                             </div>
+                             {isStudent ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                   {['all', 'boys', 'girls', 'co'].map(t => (
+                                      <button 
+                                         key={t}
+                                         onClick={() => setLocalFilters(prev => ({...prev, type: t}))}
+                                         className={`px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-colors ${localFilters.type === t ? 'bg-[#801786] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                      >
+                                         {t === 'co' ? 'Co-living' : t}
+                                      </button>
+                                   ))}
+                                </div>
+                             ) : (
+                                <div className="flex flex-wrap gap-1.5">
+                                   {['all', '1bhk', '2bhk', '3bhk'].map(t => (
+                                      <button 
+                                         key={t}
+                                         onClick={() => setLocalFilters(prev => ({...prev, type: t}))}
+                                         className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase transition-colors ${localFilters.type === t ? 'bg-[#801786] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                      >
+                                         {t}
+                                      </button>
+                                   ))}
+                                </div>
+                             )}
                           </div>
                           <div>
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sort by Rent</p>
